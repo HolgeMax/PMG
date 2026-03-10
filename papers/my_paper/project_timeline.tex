@@ -1,0 +1,297 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{colortbl}
+\usepackage{graphicx}
+
+% ── Colour definitions ──
+\definecolor{phase1}{HTML}{2E86AB}
+\definecolor{phase2}{HTML}{A23B72}
+\definecolor{phase3}{HTML}{F18F01}
+
+\title{Project Timeline\\[0.3em]
+\large Special Course: Automated Detection of Polymicrogyria Using Deep Learning}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ============================================================
+\section*{Project Overview}
+% ============================================================
+
+This project investigates deep-learning-based detection of polymicrogyria (PMG) from brain MRI.
+The work proceeds in stages: (1)~reproduce the 2D preprocessing and classification pipeline of Guha et al.\ (2025) on the public PPMR dataset; (2)~improve the methodology, potentially incorporating the cDCM loss from Zhang et al.\ (2024) and subject-level data splitting; and (3)~evaluate whether the improved pipeline generalises to a clinical epilepsy cohort from the Eastern Region of Denmark.
+
+Two timeline versions are provided below.
+\textbf{Version~A} covers only the Kaggle-based reproduction and extension.
+\textbf{Version~B} adds the clinical-cohort validation stage, which involves FreeSurfer surface reconstruction and additional preprocessing considerations.
+
+% ============================================================
+\section*{Key Information}
+% ============================================================
+
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+    \textbf{Submission deadline (KU):}  & 12 June 2026 \\
+    \textbf{Submission deadline (DTU):} & TBD\,---\,confirm early \\
+    \textbf{Project type:}              & Special course \\
+    \textbf{Public dataset:}            & PPMR (Kaggle), 15\,056 JPEG slices, 23 patients \\
+    \textbf{Clinical dataset:}          & 183 T1w scans, 162 epilepsy patients (110 PMG, 73 non-PMG) \\
+    \textbf{Effective start date:}      & 2 March 2026 (preparation period: 16--28 Feb) \\
+    \textbf{Total working time:}        & $\sim$15 weeks (2 Mar\,--\,12 Jun 2026) \\
+\end{tabularx}
+
+% ############################################################
+%
+%   VERSION A: KAGGLE REPRODUCTION + EXTENSION
+%
+% ############################################################
+
+\newpage
+\part*{Version A\,---\,Kaggle Reproduction \& Extension Only}
+
+This version assumes the project scope is limited to the PPMR dataset from Kaggle: reproduce Guha et al., improve the method (subject-level splits, cDCM loss), and write the report. \textbf{No clinical cohort.}
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase1}{Phase 1: Reproduction \& 2D Baseline \hfill Weeks 1--5 {\normalfont(2 Mar\,--\,5 Apr)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Reproduce the Guha et al.\ preprocessing pipeline and classification results on the PPMR dataset.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Week 1 (2--8 Mar):}
+    Set up the development environment (Python, PyTorch/TensorFlow, GPU access).
+    Download the PPMR dataset from Kaggle.
+    Perform exploratory data analysis: class distribution, per-patient slice counts, image dimensions.
+
+    \item \textbf{Week 2 (9--15 Mar):}
+    Implement the preprocessing pipeline: grayscale conversion, min--max normalisation, CLAHE (clip limit 2.0, tile grid $8\times8$), bilateral filtering ($d{=}9$, $\sigma_{\text{colour}}{=}\sigma_{\text{space}}{=}75$), and Canny edge detection (thresholds 50/200, $\alpha{=}0.20$).
+    Visually verify each step against figures in Guha et al.
+
+    \item \textbf{Week 3 (16--22 Mar):}
+    Reproduce the original 60/20/20 random split.
+    Train the first baseline model (DenseNet-201) on both original and preprocessed images.
+    Compare against the reported metrics (accuracy, precision, recall, F1, Cohen's $\kappa$).
+
+    \item \textbf{Week 4 (23--29 Mar):}
+    Train the remaining architectures: ResNet-50, ResNet-101, VGG-16, MobileNetV2.
+    Run five-fold cross-validation as described in the paper.
+    Compile a results table comparable to Tables~2--6 in Guha et al.
+
+    \item \textbf{Week 5 (30 Mar\,--\,5 Apr):}
+    Implement a \emph{subject-level} train/validation/test split to eliminate data leakage between patients (following Zhang et al.'s recommendation).
+    Re-run the best-performing models under the new split and compare with the random-split results.
+\end{itemize}
+
+\noindent\textbf{Milestone:} Baseline results reproduced with both split strategies; discrepancies documented.
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase2}{Phase 2: Method Extension \& Experiments \hfill Weeks 6--10 {\normalfont(6 Apr\,--\,10 May)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Improve the classification approach using the cDCM loss and run comparative experiments.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Week 6 (6--12 Apr):}
+    Study the cDCM loss formulation (Eq.~1 in Zhang et al.) in detail.
+    Implement the loss function and the MLP projection head (512$\to$128 units) on top of a ResNet-50 backbone.
+
+    \item \textbf{Week 7 (13--19 Apr):}
+    Train the cDCM-based model on the PPMR dataset using the subject-level split.
+    Implement five-fold double cross-validation (15:4:4 patient ratio).
+    Tune hyperparameters: margin, $\alpha$, learning rate schedule.
+
+    \item \textbf{Week 8 (20--26 Apr):}
+    Run comparative experiments across all combinations:
+    \{original images, preprocessed images\} $\times$ \{cross-entropy, cDCM loss\} $\times$ \{random split, subject split\}.
+    Evaluate with accuracy, precision, recall, F1, $F_2$, and AUC-ROC.
+
+    \item \textbf{Week 9 (27 Apr\,--\,3 May):}
+    Implement GradCAM++ visualisations for the best-performing models from each approach.
+    Analyse and compare attention maps: do models trained with cDCM focus on cortically relevant regions?
+
+    \item \textbf{Week 10 (4--10 May):}
+    Consolidate all experimental results.
+    Produce final tables, figures, and comparison plots.
+    Identify any gaps or failed experiments that need follow-up.
+\end{itemize}
+
+\noindent\textbf{Milestone:} All experiments completed; results tables and figures ready for the report.
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase3}{Phase 3: Writing \& Buffer \hfill Weeks 11--15 {\normalfont(11 May\,--\,12 Jun)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Write the report and address remaining gaps. This phase doubles as a buffer.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Weeks 11--12 (11--24 May):}
+    Write the core report sections: introduction, related work, methods, and experimental setup.
+    Draft the results section using figures and tables from Phase~2.
+
+    \item \textbf{Week 13 (25--31 May):}
+    Write the discussion and conclusion.
+    Re-run any experiments that need fixing or additional analysis.
+
+    \item \textbf{Week 14 (1--7 Jun):}
+    Full revision pass: proofread, check references, verify figure/table consistency.
+    \textbf{Internal deadline: first complete draft by 7 June.}
+
+    \item \textbf{Week 15 (8--12 Jun):}
+    Final polish, formatting, and submission.
+    \textbf{Submit by 12 June.}
+\end{itemize}
+
+\noindent\textbf{Milestone:} Report submitted.
+
+
+% ############################################################
+%
+%   VERSION B: FULL PIPELINE INCLUDING CLINICAL COHORT
+%
+% ############################################################
+
+\newpage
+\part*{Version B\,---\,Full Pipeline Including Clinical Cohort}
+
+This version extends Version~A by adding a third stage: applying the developed methods to the clinical epilepsy cohort (183 scans, 162 patients). This requires FreeSurfer processing, handling multi-scanner variability, and evaluating PMG vs.\ non-PMG epilepsy classification. The phases are compressed to fit the same 15-week window.
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase1}{Phase 1: Kaggle Reproduction \hfill Weeks 1--4 {\normalfont(2--29 Mar)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Reproduce Guha et al.\ on the PPMR dataset (compressed by one week).
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Week 1 (2--8 Mar):}
+    Environment setup; dataset download; exploratory data analysis.
+    Begin implementing the preprocessing pipeline.
+
+    \item \textbf{Week 2 (9--15 Mar):}
+    Complete the preprocessing pipeline.
+    Train the first baseline model (DenseNet-201) with the original 60/20/20 split.
+
+    \item \textbf{Week 3 (16--22 Mar):}
+    Train remaining architectures (ResNet-50, ResNet-101, VGG-16, MobileNetV2).
+    Run five-fold cross-validation; compile results tables.
+
+    \item \textbf{Week 4 (23--29 Mar):}
+    Implement subject-level splitting and re-evaluate best models.
+    Document reproduction results and any discrepancies.
+\end{itemize}
+
+\noindent\textbf{Milestone:} Kaggle baseline reproduced; subject-split results available.
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase2}{Phase 2: Method Extension \& cDCM \hfill Weeks 5--7 {\normalfont(30 Mar\,--\,19 Apr)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Implement the cDCM loss and run comparative experiments on the Kaggle data.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Week 5 (30 Mar\,--\,5 Apr):}
+    Implement the cDCM loss and MLP head.
+    Train on the PPMR dataset with subject-level splits and double cross-validation.
+
+    \item \textbf{Week 6 (6--12 Apr):}
+    Full comparative experiments:
+    \{original, preprocessed\} $\times$ \{CE, cDCM\} $\times$ \{random, subject split\}.
+
+    \item \textbf{Week 7 (13--19 Apr):}
+    GradCAM++ visualisations.
+    Consolidate Kaggle-based results into final tables and figures.
+\end{itemize}
+
+\noindent\textbf{Milestone:} All Kaggle experiments completed; methods ready to transfer.
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase3}{Phase 3: Clinical Cohort Evaluation \hfill Weeks 8--10 {\normalfont(20 Apr\,--\,10 May)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Adapt and evaluate the pipeline on the clinical epilepsy MRI data.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Week 8 (20--26 Apr):}
+    Prepare the clinical dataset: convert DICOM to NIfTI (if needed), run FreeSurfer \texttt{recon-all} for cortical surface reconstruction, and extract regional surface-based features (cortical thickness, curvature, sulcal depth).
+    Assess scan quality (SNR in WM/GM) and flag problematic scans.
+
+    \textit{Note:} FreeSurfer processing is compute-heavy ($\sim$6--12\,h per scan). Start batch jobs as early as possible; overlap with other tasks.
+
+    \item \textbf{Week 9 (27 Apr\,--\,3 May):}
+    Apply the Guha et al.\ preprocessing pipeline to the clinical MRI slices (adapting for different resolutions and scanner protocols).
+    Train the best model configurations from Phase~2 on the clinical data.
+    Evaluate PMG vs.\ non-PMG epilepsy classification performance.
+
+    \item \textbf{Week 10 (4--10 May):}
+    Compare clinical-cohort results with Kaggle results.
+    Analyse failure cases and domain-shift effects (multi-scanner, age range, disease complexity).
+    Finalise all experimental results.
+\end{itemize}
+
+\noindent\textbf{Milestone:} Clinical evaluation completed; all results ready for the report.
+
+% ────────────────────────────────────────────────────────────
+\subsection*{\textcolor{phase3}{Phase 4: Writing \& Buffer \hfill Weeks 11--15 {\normalfont(11 May\,--\,12 Jun)}}}
+% ────────────────────────────────────────────────────────────
+
+\textbf{Goal:} Write the report and handle remaining issues.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Weeks 11--12 (11--24 May):}
+    Write all report sections: introduction, related work, methods (covering both the Kaggle and clinical pipelines), and experimental setup.
+    Draft the results section.
+
+    \item \textbf{Week 13 (25--31 May):}
+    Write the discussion (comparing Kaggle vs.\ clinical results, limitations of the clinical cohort, multi-scanner challenges) and conclusion.
+    Re-run any experiments that need fixing.
+
+    \item \textbf{Week 14 (1--7 Jun):}
+    Full revision pass.
+    \textbf{Internal deadline: complete draft by 7 June.}
+
+    \item \textbf{Week 15 (8--12 Jun):}
+    Final formatting and submission.
+    \textbf{Submit by 12 June.}
+\end{itemize}
+
+\noindent\textbf{Milestone:} Report submitted.
+
+
+% ============================================================
+\section*{Risks and Contingencies (Both Versions)}
+% ============================================================
+
+\begin{itemize}[leftmargin=*]
+    \item If reproducing Guha et al.\ takes longer than expected, the cDCM extension can be reduced to fewer model$\times$split combinations.
+    \item \textbf{Version B only:} FreeSurfer processing is a bottleneck. Start \texttt{recon-all} jobs during Phase~1 so results are available by Week~8. If FreeSurfer fails on too many scans, fall back to image-based features only.
+    \item \textbf{Version B only:} If the clinical cohort evaluation does not yield meaningful results, report the negative finding and focus the discussion on domain-shift challenges.
+    \item The DTU submission deadline must be confirmed in the first week to avoid scheduling conflicts.
+    \item Phase~3 (Version~A) / Phase~4 (Version~B) serves as a built-in buffer; writing can be compressed to weeks 13--15 if code work overruns.
+\end{itemize}
+
+% ============================================================
+\section*{Summary Comparison}
+% ============================================================
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+ & \textbf{Version A} & \textbf{Version B} \\
+\midrule
+\textbf{Scope} & Kaggle PPMR only & Kaggle PPMR + clinical cohort \\
+\textbf{Reproduction} & 5 weeks & 4 weeks (compressed) \\
+\textbf{Extension (cDCM)} & 5 weeks & 3 weeks (compressed) \\
+\textbf{Clinical evaluation} & --- & 3 weeks \\
+\textbf{Writing \& buffer} & 5 weeks & 5 weeks \\
+\textbf{Risk level} & Lower & Higher (FreeSurfer, domain shift) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\end{document}

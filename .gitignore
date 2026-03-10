@@ -1,0 +1,43 @@
+# Ignore AI
+.gemini/
+CLAUDE.md
+GEMINI.md
+how-to.md
+
+gha-creds-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Results and outputs
+results/
+outputs/
+*.png
+*.jpg
+*.jpeg
+/config.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

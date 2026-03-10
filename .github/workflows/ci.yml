@@ -1,0 +1,52 @@
+# .github/workflows/ci.yml
+name: Python CI
+
+# This action runs on every push to the 'main' branch
+# and on every pull request that targets the 'main' branch.
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checks out your repository's code
+    - uses: actions/checkout@v4
+
+    # 2. Sets up the Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' # You can change this version if needed
+
+    # 3. Installs your project's dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # We install ruff for linting, pytest for testing, and mypy for type checking
+        pip install ruff pytest mypy
+        # TODO: Once you have a requirements.txt file, you can install from it:
+        # pip install -r requirements.txt
+
+    # 4. Runs the linter to check for code quality
+    - name: Lint with ruff
+      run: |
+        ruff check .
+
+    # 5. Type checks your code with mypy
+    - name: Type Check with mypy
+      run: |
+        mypy .
+
+    # 6. Runs tests (this will pass if you have no tests)
+    - name: Test with pytest
+      env:
+        # The secret is exposed as an environment variable
+        TEST_API_KEY: ${{ secrets.API_KEY_FOR_TESTING }}
+      run: |
+        pytest
+

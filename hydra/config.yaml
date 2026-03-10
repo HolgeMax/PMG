@@ -1,0 +1,19 @@
+# Main Hydra configuration
+defaults:
+  - preprocessing: default
+  - _self_
+
+# Input/output settings
+# input_path can be a single file (.nii, .nii.gz, .jpg, .jpeg)
+# or a directory — all supported files inside will be processed.
+input_path: data/nii_test
+slice_idx: null       # NIfTI only: axial slice index (null = middle slice)
+recursive: false      # set true to also search sub-directories
+
+# Hydra configuration
+hydra:
+  run:
+    dir: results/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: results/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

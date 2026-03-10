@@ -1,0 +1,23 @@
+# @package _global_.preprocessing
+# Default preprocessing settings (matching Guha & Bhandage 2025 paper)
+
+convert_to_grayscale: true
+
+normalization:
+  method: min_max  # Options: min_max, zscore
+  output_range: [0.0, 1.0]
+
+clahe:
+  clip_limit: 2.0
+  tile_grid_size: [8, 8]
+
+bilateral:
+  diameter: 9
+  sigma_color: 75.0
+  sigma_space: 75.0
+
+canny:
+  low_threshold: 50
+  high_threshold: 200
+  aperture_size: 3
+  blend_alpha: 0.20  # 20% edges, 80% original
