@@ -1,3 +1,65 @@
+## Daily Summary - 11.03.26 - 1 session registered
+
+**Key Accomplishments:**
+- Debugged silent slice-count discrepancy in JPEG_exploration.ipynb: identified 1 PMG slice silently skipped in label parsing; confirmed grand total of 15,056 slices (2256 label=1)
+- Rebuilt all notebook plots to use centralized `df_all` and `df_total` dataframes, eliminating scattered intermediary dataframes and the patient-22 exclusion shading
+- Remade all 6 saved plots in `results/plots/` using new dataframes with `plt.savefig` before `plt.show()`
+- Fixed section 5 preprocessing comparison: simplified from 4 presets to Original vs Minimal only (only `minimal` exists on disk), and fixed blank-save bug by placing `plt.savefig` before `plt.show()`
+
+**Open Items:**
+- Run preprocessing comparison grid on full PPMR dataset
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+- Run end-to-end training with `src/main/train.py` and verify loss curves
+- Validate FOV confound via naive CNN baseline experiment
+
+---
+
+### Session 11 - 11.03.26
+
+#### JPEG Exploration Notebook — Slice Count Debug, Plot Refactor & Preprocessing Fix
+
+**Slice count debug — 1 PMG slice silently skipped:**
+- Identified that a `try/except` block in the label parsing loop was silently catching and discarding a single PMG file, causing the reported slice count for label=1 to be off by 1.
+- After the fix the label=1 count updated to 2256, confirming the correct grand total of 15,056 slices across all patients and label categories.
+
+**Plot refactor — centralized `df_all` and `df_total`:**
+- Deleted 10 old plot cells that used scattered intermediary dataframes (`df_stats_clean`, `df_pivot`, etc.).
+- Added new plot cells reading from `df_all` (per-patient, per-label breakdown) and `df_total` (aggregate counts).
+- Removed the patient-22 exclusion shading that had been present in all bar plots; all patients now rendered uniformly.
+
+**Remade all 6 saved plots in `results/plots/`:**
+All plots are now saved with `plt.savefig` called before `plt.show()` to prevent blank file saves. Files updated:
+- `scatter.png` — image-size distribution scatter
+- `bar_pmgcases.png` — PMG composition per patient (2-subplot: with/without uncertain label=3)
+- `barcolour_PMG+controls.png` — stacked bar with 5 segments (PMG+, PMG-, ctrl1/2/3)
+- `bar_pmg+controls.png` — 4-way pie + bar (with uncertain)
+- `true_dist_bar_pmg+controls.png` — binary pie + bar (n=14,181, excluding uncertain)
+- `piedesection.png` — folder-level pie + label breakdown bar
+- `preprocessing_comparison.png` — new: Original vs Minimal comparison
+
+**Section 5 fix — preprocessing comparison:**
+- Old code expected 4 preset outputs on disk (`no_filter`, `minimal`, `light`, `default`); only `minimal` exists in `data/PPMR_processed/`.
+- Simplified section 5 to an Original vs Minimal 2-column grid for available patients.
+- Fixed blank-save bug by ensuring `plt.savefig` is called before `plt.show()`.
+
+#### Key Files Modified
+- `notebooks/JPEG_exploration.ipynb` — slice count bug fix, deleted 10 old plot cells, new plot cells using `df_all`/`df_total`, patient-22 shading removed, section 5 preprocessing comparison simplified, all `plt.savefig` calls moved before `plt.show()`
+- `results/plots/scatter.png` — regenerated
+- `results/plots/bar_pmgcases.png` — regenerated
+- `results/plots/barcolour_PMG+controls.png` — regenerated
+- `results/plots/bar_pmg+controls.png` — regenerated
+- `results/plots/true_dist_bar_pmg+controls.png` — regenerated
+- `results/plots/piedesection.png` — regenerated
+- `results/plots/preprocessing_comparison.png` — new file added
+
+#### Open Items
+- Run preprocessing comparison grid on full PPMR dataset (currently only sample patients)
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+- Run end-to-end training with `src/main/train.py` and verify loss curves
+- Validate FOV confound via naive CNN baseline experiment
+
+---
+
 ## Daily Summary - 09.03.26 - 1 session registered
 
 **Key Accomplishments:**
