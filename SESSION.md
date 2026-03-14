@@ -60,6 +60,86 @@ All plots are now saved with `plt.savefig` called before `plt.show()` to prevent
 
 ---
 
+### Session 14 - 14.03.26
+
+#### Training Pipeline — End-to-End Implementation & Bug Fixes
+
+**`hydra/model/data_loader.yaml` — ImageNet stats fix (runtime crash resolved):**
+- `mean: null` and `std: null` were replaced with explicit ImageNet values `[0.485, 0.456, 0.406]` and `[0.229, 0.224, 0.225]`.
+- The previous `null` values caused a runtime crash in `data_augmentation()` because `torchvision.transforms.Normalize` does not accept `None` as input.
+- This fix is required for all pretrained backbone runs; without it, no training could proceed.
+
+**`hydra/model/train.yaml` — three new keys added:**
+- `val_frac: 0.15`, `test_frac: 0.15`, and `seed: 42` added to the training config.
+- These control the patient-level split parameters consumed by `split_dataset()`.
+
+**`src/func/data/get_loader.py` — patient-level split implemented:**
+- `PMGDataset.__init__` now accepts a `samples` keyword argument (pre-built `(Path, int)` list), providing a fast path that bypasses filesystem scanning. This is used by `split_dataset()` to avoid re-scanning for each of the three splits.
+- `data_dir` parameter made optional (defaults to `None`) to support the `samples=` fast path.
+- New function `split_dataset(data_dir, val_frac, test_frac, seed, pmg_negative_mode)` added:
+  - Builds a full `PMGDataset` once, groups sample indices by patient ID (first `_`-delimited field of the filename stem, e.g. `10cor` from `10cor_1_42_1_preprocessed.jpg`).
+  - Shuffles patients with a seeded `random.Random` for reproducibility.
+  - Assigns patient groups to test, val, and train splits; slices from the same patient always land in the same split, preventing data leakage.
+  - Returns three `(Path, int)` lists ready to pass as `samples=` to `PMGDataset`.
+
+**`src/func/models/get_train.py` — training loop implemented (was empty):**
+- `train_one_epoch(model, dataloader, optimizer, device)` — sets model to train mode, iterates batches, computes `BCEWithLogitsLoss`, calls backward + optimizer step, returns mean loss over the epoch.
+- `validate_one_epoch(model, dataloader, device)` — eval mode, no-grad, returns mean loss.
+- `test_one_epoch(model, dataloader, device)` — identical to validate; separate function for clarity.
+- `train(cfg)` — top-level function consumed by the CLI:
+  - Resolves device (falls back to CPU if CUDA unavailable).
+  - Builds the model via `build_resnet101` or `build_densenet201` based on `cfg.model.name`.
+  - Calls `split_dataset()` using config values for `val_frac`, `test_frac`, `seed`, and `pmg_negative_mode`.
+  - Instantiates three `PMGDataset` objects from the returned sample lists, one with training augmentation and two with eval transforms.
+  - Wraps each in `get_dataloader()`.
+  - Runs the training loop for `cfg.train.num_epochs` epochs, printing train/val/test loss each epoch.
+- `__main__` block: shape and parameter-freeze self-tests for `PMGHead`, ResNet-101, and DenseNet-201 (verifies output shape `(2,1)` and that only head parameters are trainable when `freeze_backbone=True`).
+
+**`src/cli/train.py` — CLI entry point implemented (was empty):**
+- Hydra-decorated `main(cfg)` function that calls `train(cfg)`.
+- `train_cli()` wrapper registered in `pyproject.toml` as the `train` script entry point.
+- `__main__` guard for direct execution.
+
+**`pyproject.toml` — `train` script entry point added:**
+- Added `train = "src.cli.train:train_cli"` to `[project.scripts]`.
+- Command is now invokable as `uv run train` with any Hydra overrides.
+
+**`src/func/models/get_models.py` — unused variable removed:**
+- Deleted the `classifier = model.classifier` line in `build_densenet201` (the variable was assigned but never used, flagged as a bug in Session 12 open items).
+
+**`src/main/configurable_train.py` — old scaffold cleared:**
+- File content removed; the functionality has been fully superseded by `src/func/models/get_train.py` and `src/cli/train.py`.
+
+**`how-to-run-experiments.md` — training documentation added:**
+- Title renamed from "How to Run Preprocessing Experiments" to "How to Run Experiments".
+- New "Training" section added covering:
+  - Quick start examples (`uv run train`, model/hyperparameter overrides, data directory override).
+  - Full override reference table for `model.*`, `train.*`, and `data_loader.*` namespaces including all keys, types, and defaults.
+  - `pmg_negative_mode` semantics (`correct` vs `paper`).
+  - Multirun sweep examples: single-axis and grid search (model x learning rate).
+  - Common workflow recipes: paper replication, fine-tuning with unfrozen backbone, smoke test, alternate preprocessing preset.
+  - Key files table for the training subsystem.
+- "Key Files" section renamed to "Key Files (Preprocessing)" and new "Key Files (Training)" table added.
+
+#### Key Files Modified
+- `hydra/model/data_loader.yaml` — `mean`/`std` `null` replaced with explicit ImageNet stats
+- `hydra/model/train.yaml` — `val_frac`, `test_frac`, `seed` added
+- `src/func/data/get_loader.py` — `PMGDataset` accepts `samples=` fast path; `split_dataset()` added
+- `src/func/models/get_train.py` — full training loop implemented (was empty)
+- `src/cli/train.py` — Hydra CLI entry point implemented (was empty)
+- `pyproject.toml` — `train` script entry point registered
+- `src/func/models/get_models.py` — unused `classifier` variable removed
+- `src/main/configurable_train.py` — old scaffold cleared
+- `how-to-run-experiments.md` — full training section added
+
+#### Open Items
+- Run `uv run train` end-to-end on actual data to verify loss curves
+- Address `pretrained=True` deprecation in `get_models.py` (use `weights=` API)
+- Validate FOV confound via naive CNN baseline experiment
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+
+---
+
 ### Session 13 - 14.03.26
 
 #### `get_models.py` — freeze_backbone bug fix & Dropout2d fix

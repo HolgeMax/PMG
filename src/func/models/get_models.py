@@ -75,8 +75,6 @@ def build_densenet201(dropout_p=0.5, freeze_backbone=False):
 
     model = models.densenet201(pretrained=True)
 
-    classifier = model.classifier
-
     in_features = model.classifier.in_features
 
     model.classifier = PMGHead(in_features=in_features, dropout_p=dropout_p)

@@ -1,3 +1,6 @@
+import random
+from collections import defaultdict
+
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
@@ -88,19 +91,25 @@ class PMGDataset(Dataset):
     _RAW_PMG_NEG   = 2   # PMG patient but no PMG visible here
     _RAW_UNCERTAIN = 3   # uncertain / ambiguous annotation
 
-    def __init__( # add cfg instead of many args
+    def __init__(
         self,
-        data_dir: str,
+        data_dir: str = None,
         transform=None,
         pmg_negative_mode: str = "correct",
+        samples: list = None,           # pre-built list from split_dataset()
     ):
         if pmg_negative_mode not in ("paper", "correct"):
             raise ValueError("pmg_negative_mode must be 'paper' or 'correct'")
 
         self.transform = transform
         self.pmg_negative_mode = pmg_negative_mode
-        self.samples: list[tuple[Path, int]] = []
 
+        if samples is not None:
+            # fast path: use a pre-built (path, label) list from split_dataset()
+            self.samples = samples
+            return
+
+        self.samples: list[tuple[Path, int]] = []
         data_dir = Path(data_dir)
         for file in collect_input_files(data_dir, recursive=True):
             label = self._assign_label(file)
@@ -271,6 +280,69 @@ def get_dataloader( # add cfg instead of many args
         num_workers=num_workers,
         pin_memory=True,
     )
+
+
+# ------------------------------------------------------------------------------
+# Patient-level train / val / test split
+# ------------------------------------------------------------------------------
+
+def split_dataset(
+    data_dir: str,
+    val_frac: float = 0.15,
+    test_frac: float = 0.15,
+    seed: int = 42,
+    pmg_negative_mode: str = "correct",
+) -> tuple[list, list, list]:
+    """
+    Split all samples in *data_dir* into train / val / test at the patient level.
+
+    Slices from the same patient always land in the same split, preventing
+    data leakage between the sets.
+
+    Patient identity is read from the first ``_``-delimited field of each
+    filename stem (e.g. ``10cor`` from ``10cor_1_42_1_preprocessed.jpg``).
+
+    Parameters
+    ----------
+    data_dir : str
+        Root directory passed to :class:`PMGDataset`.
+    val_frac, test_frac : float
+        Fraction of *patients* (not slices) assigned to each held-out split.
+    seed : int
+        Random seed for reproducible shuffling.
+    pmg_negative_mode : str
+        Passed to :class:`PMGDataset` for label assignment.
+
+    Returns
+    -------
+    train_samples, val_samples, test_samples : list of (Path, int)
+        Three (path, label) lists ready to pass as ``samples=`` to
+        :class:`PMGDataset`.
+    """
+    full = PMGDataset(data_dir=data_dir, pmg_negative_mode=pmg_negative_mode)
+
+    # group sample indices by patient ID (first "_"-field of the stem)
+    patient_map: dict[str, list[int]] = defaultdict(list)
+    for idx, (path, _) in enumerate(full.samples):
+        pid = path.stem.split("_")[0]
+        patient_map[pid].append(idx)
+
+    patients = list(patient_map.keys())
+    rng = random.Random(seed)
+    rng.shuffle(patients)
+
+    n = len(patients)
+    n_test = max(1, round(n * test_frac))
+    n_val  = max(1, round(n * val_frac))
+
+    test_pids  = set(patients[:n_test])
+    val_pids   = set(patients[n_test:n_test + n_val])
+    train_pids = set(patients[n_test + n_val:])
+
+    def _collect(pids):
+        return [full.samples[i] for pid in pids for i in patient_map[pid]]
+
+    return _collect(train_pids), _collect(val_pids), _collect(test_pids)
 
 
 # ------------------------------------------------------------------------------

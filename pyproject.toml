@@ -36,6 +36,7 @@ dependencies = [
 
 [project.scripts]
 preprocess = "src.cli.preprocess:preprocess_cli"
+train      = "src.cli.train:train_cli"
 
 
 # == Optional/Development Dependencies ==

@@ -1,4 +1,4 @@
-# How to Run Preprocessing Experiments
+# How to Run Experiments
 
 Configuration is managed with **Hydra**. All results are saved to `results/` automatically.
 
@@ -182,7 +182,7 @@ uv run preprocess input_path=data/nii_test/file.nii preprocessing=light
 
 ---
 
-## Key Files
+## Key Files (Preprocessing)
 
 | File | Purpose |
 |------|---------|
@@ -191,3 +191,123 @@ uv run preprocess input_path=data/nii_test/file.nii preprocessing=light
 | `src/cli/preprocess.py` | CLI entry point |
 | `src/func/utils/loader.py` | JPEG + NIfTI loader |
 | `src/main/configurable_pipeline.py` | Pipeline logic |
+
+---
+
+# Training
+
+Configuration is managed with **Hydra**. All parameters have sensible defaults — override only what you need.
+
+---
+
+## Quick Start
+
+```bash
+# Run with all defaults (ResNet101, 20 epochs, lr=1e-4)
+uv run train
+
+# Change model
+uv run train model.name=densenet201
+
+# Change training hyperparameters
+uv run train train.num_epochs=30 train.learning_rate=1e-3
+
+# Change data directory (e.g. different preprocessing preset)
+uv run train data_loader.data_dir=data/PPMR_light
+```
+
+---
+
+## Override Parameters
+
+### `model.*` — Model architecture
+
+```
+model.name             resnet101 | densenet201
+model.pretrained       true | false        (use ImageNet weights)
+model.dropout_p        float               (dropout before classifier head)
+model.freeze_backbone  true | false        (freeze conv layers, train head only)
+```
+
+### `train.*` — Training loop
+
+```
+train.batch_size       int                 (samples per batch, default: 32)
+train.num_epochs       int                 (default: 20)
+train.learning_rate    float               (default: 1e-4)
+train.weight_decay     float               (L2 regularisation, default: 1e-5)
+train.num_workers      int                 (dataloader workers, default: 4)
+train.device           cuda | mps | cpu
+train.val_frac         float               (fraction of patients for val, default: 0.15)
+train.test_frac        float               (fraction of patients for test, default: 0.15)
+train.seed             int                 (random seed, default: 42)
+```
+
+### `data_loader.*` — Data pipeline
+
+```
+data_loader.data_dir           str         (root dir with PMGcases/ and controlcases/)
+data_loader.crop_size          int         (spatial size after crop, default: 224)
+data_loader.scale              [float,float]  (random crop area range, default: [0.8,1.0])
+data_loader.mean               [float,float,float]  (ImageNet: [0.485,0.456,0.406])
+data_loader.std                [float,float,float]  (ImageNet: [0.229,0.224,0.225])
+data_loader.pmg_negative_mode  correct | paper
+```
+
+`pmg_negative_mode`:
+- `correct` — label=2 (PMG patient, slice looks normal) → HC; label=3 excluded
+- `paper` — replicates Guha & Bhandage 2025: all PMG-folder slices → positive
+
+---
+
+## Parameter Sweeps (multirun)
+
+Add `-m` and comma-separate values to sweep multiple runs:
+
+```bash
+# Compare models
+uv run train -m model.name=resnet101,densenet201
+
+# Sweep learning rate
+uv run train -m train.learning_rate=1e-3,1e-4,1e-5
+
+# Grid search — model × learning rate (2×3 = 6 runs)
+uv run train -m \
+    model.name=resnet101,densenet201 \
+    train.learning_rate=1e-3,1e-4,1e-5
+
+# Compare label modes
+uv run train -m data_loader.pmg_negative_mode=correct,paper
+```
+
+---
+
+## Common Workflows
+
+```bash
+# Replicate the paper (DenseNet201, paper label mode)
+uv run train model.name=densenet201 data_loader.pmg_negative_mode=paper
+
+# Fine-tune full network (unfreeze backbone)
+uv run train model.freeze_backbone=false train.learning_rate=1e-5
+
+# Quick smoke test (few epochs, small batch)
+uv run train train.num_epochs=2 train.batch_size=8
+
+# Train on a different preprocessing preset
+uv run train data_loader.data_dir=data/PPMR_light
+uv run train data_loader.data_dir=data/PPMR_minimal
+```
+
+---
+
+## Key Files (Training)
+
+| File | Purpose |
+|------|---------|
+| `hydra/model/model.yaml` | Model defaults |
+| `hydra/model/train.yaml` | Training loop defaults |
+| `hydra/model/data_loader.yaml` | Data pipeline defaults |
+| `src/cli/train.py` | CLI entry point |
+| `src/func/models/get_train.py` | Training logic |
+| `src/func/data/get_loader.py` | Dataset & dataloader |
