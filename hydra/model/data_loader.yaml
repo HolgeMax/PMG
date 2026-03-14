@@ -1,0 +1,13 @@
+# DataLoader configuration for PMG classification.
+# Accessible in code as cfg.data_loader.*
+#
+# pmg_negative_mode options:
+#   "correct" — label=2 → HC, label=3 excluded  (methodologically correct)
+#   "paper"   — label=2 and label=3 → PMG        (replicates Guha & Bhandage 2025)
+
+data_dir: data/PPMR_default
+crop_size: 224
+scale: [0.8, 1.0]
+mean: null   
+std: null
+pmg_negative_mode: correct

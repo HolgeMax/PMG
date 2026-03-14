@@ -1,0 +1,8 @@
+# @package _global_.model
+# Model configuration for PMG classification
+
+# Model settings
+name: resnet101  # Options: ResNet101, DenseNet201
+pretrained: true
+dropout_p: 0.5
+freeze_backbone: true

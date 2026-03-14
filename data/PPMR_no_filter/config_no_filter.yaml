@@ -1,0 +1,25 @@
+preprocessing:
+  convert_to_grayscale: true
+  normalization:
+    method: min_max
+    output_range:
+    - 0.0
+    - 1.0
+  clahe:
+    clip_limit: 2.0
+    tile_grid_size:
+    - 8
+    - 8
+  bilateral:
+    diameter: 1
+    sigma_color: 1.0
+    sigma_space: 1.0
+  canny:
+    low_threshold: 50
+    high_threshold: 200
+    aperture_size: 3
+    blend_alpha: 0.0
+input_path: data/PPMR
+output_path: data/PPMR_no_filter
+slice_idx: null
+recursive: true

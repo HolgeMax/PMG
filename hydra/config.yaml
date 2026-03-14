@@ -1,12 +1,16 @@
 # Main Hydra configuration
 defaults:
   - preprocessing: default
+  - model@data_loader: data_loader  # → cfg.data_loader.*
+  - model@model: model              # → cfg.model.*
+  - model@train: train              # → cfg.train.*
   - _self_
 
 # Input/output settings
 # input_path can be a single file (.nii, .nii.gz, .jpg, .jpeg)
 # or a directory — all supported files inside will be processed.
-input_path: data/nii_test
+input_path: data/PPMR
+output_path: data/PPMR_default
 slice_idx: null       # NIfTI only: axial slice index (null = middle slice)
 recursive: false      # set true to also search sub-directories
 

@@ -22,13 +22,12 @@ class PMGHead(nn.Module):
     def __init__(self, in_features, dropout_p=0.5):
         super().__init__()
         self.head = nn.Sequential(
-            nn.Dropout2d(p=dropout_p),
+            nn.Dropout(p=dropout_p),
             nn.Linear(in_features, 1),  
         )
 
     def forward(self, x):
         fc = self.head(x)
-
         return fc  # raw logit 
 
 
@@ -53,10 +52,10 @@ def build_resnet101(dropout_p=0.5, freeze_backbone=False):
         for name, param in model.named_parameters():
             if not name.startswith("fc"):
                 param.requires_grad = False
-            model.fc.requires_grad = True  # ensure head is trainable
-            
-    return model
+        for p in model.fc.parameters():
+            p.requires_grad = True  # ensure head is trainable
 
+    return model
 
 # ==============================================================================
 # Attach the head to DenseNet-201
@@ -86,6 +85,7 @@ def build_densenet201(dropout_p=0.5, freeze_backbone=False):
         for name, param in model.named_parameters():
             if not name.startswith("classifier"):
                 param.requires_grad = False
-            model.classifier.requires_grad = True  # ensure head is trainable
+        for p in model.classifier.parameters():
+            p.requires_grad = True  # ensure head is trainable
 
     return model

@@ -60,6 +60,125 @@ All plots are now saved with `plt.savefig` called before `plt.show()` to prevent
 
 ---
 
+### Session 13 - 14.03.26
+
+#### `get_models.py` — freeze_backbone bug fix & Dropout2d fix
+
+The two bugs flagged in Session 12 as open items are now resolved:
+
+**Bug 1 — `nn.Dropout2d` on a 1-D feature vector (`PMGHead.__init__`):**
+- `nn.Dropout2d` expects a 4-D input `(N, C, H, W)`; after global-average-pool the tensor is `(N, C)`, so every element was being zeroed.
+- Fixed by replacing `nn.Dropout2d` with `nn.Dropout`.
+
+**Bug 2 — `freeze_backbone` sets `requires_grad` on the module instead of its parameters, inside the loop:**
+- Original code called `model.fc.requires_grad = True` on the `nn.Module` object (no effect on parameter gradients) and placed the call inside the `named_parameters` loop (re-executed for every parameter).
+- Fixed in both `build_resnet101` and `build_densenet201`: moved the head-unfreeze call outside the loop and changed it to iterate over the head's parameters:
+  ```python
+  for p in model.fc.parameters():
+      p.requires_grad = True
+  ```
+- Same pattern applied to `model.classifier.parameters()` in `build_densenet201`.
+
+#### Hydra model configs — new files & double-nesting fix
+
+Three new config files created under `hydra/model/`:
+
+| File | Namespace | Purpose |
+|---|---|---|
+| `hydra/model/data_loader.yaml` | `cfg.data_loader` | DataLoader settings (data_dir, crop_size, scale, mean/std, pmg_negative_mode) |
+| `hydra/model/model.yaml` | `cfg.model` | Model settings (name, pretrained, dropout_p, freeze_backbone) |
+| `hydra/model/train.yaml` | `cfg.train` | Training settings (batch_size, num_epochs, lr, weight_decay, device) |
+
+**Double-nesting removed:** earlier drafts wrapped all keys in a redundant top-level key (e.g. `data_loader: { data_dir: ... }`); the corrected files are flat, relying on Hydra's `@package` directive to place them in the correct namespace.
+
+**`mean: null` / `std: null` fix:** YAML `None` is not valid; changed to `null` so Hydra parses the values as Python `None` without errors.
+
+**`hydra/config.yaml` updated:** added the three model config groups to the defaults list using the package-override syntax so each is accessible under its own namespace:
+```yaml
+- model@data_loader: data_loader
+- model@model: model
+- model@train: train
+```
+
+#### `src/func/data/get_loader.py` — full docstring pass
+
+Full module-level docstring added covering:
+- Dataset directory layout (`PMGcases/` and `controlcases/` sub-trees)
+- Label convention table (raw labels 0–3 and their binary mapping)
+- `pmg_negative_mode` semantics
+- Public API summary
+
+Per-function/class docstrings added for: `_parse_raw_label`, `PMGDataset`, `PMGDataset._assign_label`, `PMGDataset.__len__`, `PMGDataset.__getitem__`, `data_augmentation`, `get_dataloader`, `create_pmg_dataloader`.
+
+#### `src/cli/train.py` — training loop scaffolded
+
+New file added containing a `train()` function (model, dataloader, optimizer, device) and a `__main__` block with shape and parameter-freeze self-tests for both ResNet-101 and DenseNet-201.
+
+#### Key Files Modified
+- `src/func/models/get_models.py` — Dropout2d → Dropout; freeze_backbone loop fixed for both builders
+- `src/func/data/get_loader.py` — full module + per-function docstrings added
+- `hydra/model/data_loader.yaml` — new file
+- `hydra/model/model.yaml` — new file
+- `hydra/model/train.yaml` — new file
+- `hydra/config.yaml` — three model config groups added to defaults with package-override syntax; mean/std None → null
+
+#### Open Items
+- Fix remaining `get_models.py` issues: `pretrained=True` deprecation (use `weights=` API) and unused `classifier` variable in `build_densenet201`
+- Implement `src/func/models/get_train.py` (currently empty)
+- Run end-to-end training with `src/main/train.py` and verify loss curves
+- Validate FOV confound via naive CNN baseline experiment
+
+---
+
+### Session 12 - 13.03.26
+
+#### DataLoader implementation (`src/func/data/get_loader.py`)
+
+**Corrected label mapping** (from `notebooks/JPEG_exploration.ipynb`):
+| Raw label | Folder | Meaning |
+|---|---|---|
+| `0` | `controlcases/` | Healthy control — always HC (binary 0) |
+| `1` | `PMGcases/` | PMG visible — always positive (binary 1) |
+| `2` | `PMGcases/` | PMG patient, no PMG in slice — configurable |
+| `3` | `PMGcases/` | Uncertain / ambiguous — configurable |
+
+**`pmg_negative_mode` parameter** controls how labels 2 and 3 are treated:
+- `"paper"` — replicates Guha & Bhandage 2025: all PMG-folder slices (incl. label=2 and label=3) are positive. This is methodologically incorrect.
+- `"correct"` *(default)* — label=2 → HC (0), label=3 → excluded entirely.
+
+**Label parsed from filename** at index `[3]` of underscore-split stem, matching the notebook's convention.
+
+**Full module docstring added** covering dataset layout, label convention, compatibility notes, and public API.
+
+#### Bugs to fix in `src/func/models/get_models.py`
+
+| # | Issue | Location | Fix |
+|---|---|---|---|
+| 1 | `nn.Dropout2d` on 2-D feature vector after global-avg-pool | `PMGHead.__init__:25` | Replace with `nn.Dropout` |
+| 2 | `freeze_backbone` sets `requires_grad` on the module (not params) inside the loop | `build_resnet101:56`, `build_densenet201:89` | Move outside loop: `for p in model.fc.parameters(): p.requires_grad = True` |
+| 3 | `pretrained=True` is deprecated in newer torchvision | both builders | Use `weights=models.ResNet101_Weights.DEFAULT` / `DenseNet201_Weights.DEFAULT` |
+| 4 | `classifier` variable assigned but never used | `build_densenet201:79` | Delete that line |
+
+#### Label dtype mismatch (loader ↔ training loop)
+
+`__getitem__` returns labels as `torch.long`; `BCEWithLogitsLoss` requires `torch.float`.
+Cast in the training loop:
+```python
+loss = criterion(logit.squeeze(1), labels.float())
+```
+This is documented in `get_loader.py`'s `__getitem__` docstring and module header.
+
+#### Key Files Modified
+- `src/func/data/get_loader.py` — full rewrite: correct label mapping, `pmg_negative_mode`, full module + function docstrings
+
+#### Open Items
+- Fix `src/func/models/get_models.py` bugs listed above (Dropout2d, freeze_backbone, pretrained, unused variable)
+- Implement `src/func/models/get_train.py` (currently empty)
+- Run end-to-end training with `src/main/train.py` and verify loss curves
+- Validate FOV confound via naive CNN baseline experiment
+
+---
+
 ## Daily Summary - 09.03.26 - 1 session registered
 
 **Key Accomplishments:**

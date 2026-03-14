@@ -36,10 +36,17 @@ def main(cfg: DictConfig) -> None:
     import logging
     logging.getLogger("src.main.configurable_pipeline").setLevel(logging.WARNING)
 
+    # check if input path exists
     input_path = Path(cfg.input_path)
     if not input_path.exists():
         print(f"Error: path not found: {input_path}")
         sys.exit(1)
+
+    # check if output path exists
+    output_path = Path(cfg.output_path)
+    if not output_path.exists():
+        print(f"Output path does not exist, creating: {output_path}")
+        output_path.mkdir(parents=True, exist_ok=True)
 
     recursive = bool(cfg.get("recursive", False))
     files = collect_input_files(input_path, recursive=recursive)
@@ -51,35 +58,24 @@ def main(cfg: DictConfig) -> None:
 
     preprocess_config = config_to_preprocessing_config(cfg)
 
-    # Output directory:
-    #   PPMR input   → data/PPMR_processed/   (subject structure via loader)
-    #   directory    → data/<dir_name>_<preset>/
-    #   single file  → data/
-    data_root = project_root / "data"
-    if "PPMR" in input_path.parts:
-        output_dir = data_root / "PPMR_processed"
-    elif input_path.is_dir():
-        output_dir = data_root / f"{input_path.name}_{preset_name}"
-    else:
-        output_dir = data_root
-
+    print(f"Output path: {output_path}")
     # Save config once per run
-    output_dir.mkdir(parents=True, exist_ok=True)
-    config_path = output_dir / f"config_{preset_name}.yaml"
+    output_path.mkdir(parents=True, exist_ok=True)
+    config_path = output_path / f"config_{preset_name}.yaml"
     with open(config_path, "w") as f:
         f.write(OmegaConf.to_yaml(cfg))
 
     # ── Process files 
     print(f"\nInput  : {input_path}  ({'recursive' if recursive else 'flat'})")
     print(f"Files  : {len(files)}")
-    print(f"Output : {output_dir}\n")
+    print(f"Output : {cfg.output_path}\n")
 
     results, failed = [], []
 
     for file_path in tqdm(files, desc="Preprocessing", unit="file"):
         try:
             metrics = process_one(
-                file_path, preprocess_config, cfg.slice_idx, output_dir, preset_name,
+                file_path, preprocess_config, cfg.slice_idx, output_path, preset_name,
                 input_root=input_path if input_path.is_dir() else None,
             )
             results.append(metrics)
@@ -100,7 +96,7 @@ def main(cfg: DictConfig) -> None:
         for name in failed:
             print(f"  {name}")
     print(f"Config saved to : {config_path}")
-    print(f"Outputs in      : {output_dir}")
+    print(f"Outputs in      : {output_path}")
     print(f"\n{'─' * 70}")
     print("Config used:")
     print(OmegaConf.to_yaml(cfg))
