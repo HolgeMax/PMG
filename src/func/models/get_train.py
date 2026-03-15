@@ -60,7 +60,14 @@ def test_one_epoch(model: nn.Module, dataloader: DataLoader, device: torch.devic
 
 def train(cfg):
 
-    device = torch.device(cfg.train.device if torch.cuda.is_available() or cfg.train.device == "cpu" else "cpu")
+    requested = cfg.train.device
+    if requested == "cuda" and torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif requested == "mps" and torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
     print(f"Using device: {device}")
 
     # --- Build model ---
@@ -70,8 +77,10 @@ def train(cfg):
 
     if model_name == "resnet101":
         model = build_resnet101(dropout_p=dropout_p, freeze_backbone=freeze_backbone)
+        print(f"Built ResNet-101 with dropout_p={dropout_p} and freeze_backbone={freeze_backbone}")
     elif model_name == "densenet201":
         model = build_densenet201(dropout_p=dropout_p, freeze_backbone=freeze_backbone)
+        print(f"Built DenseNet-201 with dropout_p={dropout_p} and freeze_backbone={freeze_backbone}")
     else:
         raise ValueError(f"Unsupported model name: {model_name}")
     model.to(device)
@@ -84,7 +93,7 @@ def train(cfg):
         seed             = cfg.train.seed,
         pmg_negative_mode= cfg.data_loader.pmg_negative_mode,
     )
-
+    print(f"Split dataset into {len(train_samples)} train, {len(val_samples)} val, and {len(test_samples)} test samples")
     # --- Build dataloaders ---
     transform_kwargs = dict(
         crop_size = cfg.data_loader.crop_size,
@@ -98,9 +107,11 @@ def train(cfg):
     train_loader = get_dataloader(PMGDataset(samples=train_samples, transform=train_transform), batch_size=cfg.train.batch_size, shuffle=True,  num_workers=cfg.train.num_workers)
     val_loader   = get_dataloader(PMGDataset(samples=val_samples,   transform=eval_transform),  batch_size=cfg.train.batch_size, shuffle=False, num_workers=cfg.train.num_workers)
     test_loader  = get_dataloader(PMGDataset(samples=test_samples,  transform=eval_transform),  batch_size=cfg.train.batch_size, shuffle=False, num_workers=cfg.train.num_workers)
+    print(f"Created dataloaders with batch size {cfg.train.batch_size} and num_workers {cfg.train.num_workers}")
 
     # --- Optimizer ---
     optimizer = Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=cfg.train.learning_rate)
+    print(f"Initialized Adam optimizer with learning rate {cfg.train.learning_rate}")
 
     for epoch in range(cfg.train.num_epochs):
         train_loss = train_one_epoch(model, train_loader, optimizer, device)
@@ -112,7 +123,7 @@ def train(cfg):
               f"Val Loss: {val_loss:.4f} - "
               f"Test Loss: {test_loss:.4f}")
 
-# ==============================================================================
+# ==================================<============================================
 # Test code to verify output shapes and parameter freezing
 # ==============================================================================
 

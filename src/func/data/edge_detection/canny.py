@@ -12,6 +12,9 @@ Example:
 import cv2
 import numpy as np
 
+# =============================================================================
+# Canny edge detection function
+# =============================================================================
 
 def detect_edges_canny(
     image: np.ndarray,

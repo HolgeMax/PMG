@@ -1,9 +1,7 @@
-
-from xml.parsers.expat import model
-
 import torch
 import torch.nn as nn
 import torchvision.models as models
+from torchvision.models import ResNet101_Weights, DenseNet201_Weights
 
 #=============================================================================
 # Custom head and model-building functions
@@ -43,7 +41,7 @@ def build_resnet101(dropout_p=0.5, freeze_backbone=False):
     Returns:
         model : modified ResNet-101 ready for binary classification
     """
-    model = models.resnet101(pretrained=True) 
+    model = models.resnet101(weights=ResNet101_Weights.DEFAULT)
 
     in_features = model.fc.in_features
     model.fc = PMGHead(in_features=in_features, dropout_p=dropout_p)
@@ -73,7 +71,7 @@ def build_densenet201(dropout_p=0.5, freeze_backbone=False):
         model : modified DenseNet-201 ready for binary classification
     """
 
-    model = models.densenet201(pretrained=True)
+    model = models.densenet201(weights=DenseNet201_Weights.DEFAULT)
 
     in_features = model.classifier.in_features
 

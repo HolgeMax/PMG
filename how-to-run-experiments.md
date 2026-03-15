@@ -237,7 +237,7 @@ train.num_epochs       int                 (default: 20)
 train.learning_rate    float               (default: 1e-4)
 train.weight_decay     float               (L2 regularisation, default: 1e-5)
 train.num_workers      int                 (dataloader workers, default: 4)
-train.device           cuda | mps | cpu
+train.device           cuda | mps | cpu    (default: cuda; falls back to cpu if unavailable)
 train.val_frac         float               (fraction of patients for val, default: 0.15)
 train.test_frac        float               (fraction of patients for test, default: 0.15)
 train.seed             int                 (random seed, default: 42)
@@ -293,6 +293,9 @@ uv run train model.freeze_backbone=false train.learning_rate=1e-5
 
 # Quick smoke test (few epochs, small batch)
 uv run train train.num_epochs=2 train.batch_size=8
+
+# Run locally on Apple Silicon (default is cuda for HPC)
+uv run train train.device=mps
 
 # Train on a different preprocessing preset
 uv run train data_loader.data_dir=data/PPMR_light

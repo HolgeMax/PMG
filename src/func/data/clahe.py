@@ -14,6 +14,9 @@ from typing import Tuple
 import cv2
 import numpy as np
 
+# =============================================================================
+# CLAHE Enhancement
+# =============================================================================
 
 def apply_clahe(
     image: np.ndarray,
@@ -41,7 +44,7 @@ def apply_clahe(
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
     return clahe.apply(image_8bit)
 
-
+# convert image to uint8 format
 def _to_uint8(image: np.ndarray) -> np.ndarray:
     """Convert image to uint8 format."""
     if image.dtype == np.uint8:

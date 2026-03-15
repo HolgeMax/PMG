@@ -15,6 +15,9 @@ from typing import Tuple
 
 import numpy as np
 
+# =============================================================================
+# Min-max normalization function
+# =============================================================================
 
 def normalize_min_max(
     image: np.ndarray,

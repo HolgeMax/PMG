@@ -9,9 +9,9 @@ from PIL import Image
 
 from src.func.utils.loader import collect_input_files
 
-# ------------------------------------------------------------------------------
+# =============================================================================
 # Internal helpers
-# ------------------------------------------------------------------------------
+# =============================================================================
 
 def _parse_raw_label(path: Path) -> int | None:
     """
@@ -40,9 +40,9 @@ def _parse_raw_label(path: Path) -> int | None:
         return None
 
 
-# ------------------------------------------------------------------------------
+# ==============================================================================
 # Dataset
-# ------------------------------------------------------------------------------
+# ==============================================================================
 
 class PMGDataset(Dataset):
     """
@@ -188,9 +188,9 @@ class PMGDataset(Dataset):
         return image, torch.tensor(label, dtype=torch.long)
 
 
-# ------------------------------------------------------------------------------
+# ==============================================================================
 # Transform factory
-# ------------------------------------------------------------------------------
+# ==============================================================================
 
 def data_augmentation( # add cfg instead of many args
     crop_size: int = None,
@@ -244,9 +244,9 @@ def data_augmentation( # add cfg instead of many args
         ])
 
 
-# ------------------------------------------------------------------------------
+# ==============================================================================
 # DataLoader factory
-# ------------------------------------------------------------------------------
+# ==============================================================================
 
 def get_dataloader( # add cfg instead of many args
     dataset: Dataset,
@@ -278,13 +278,13 @@ def get_dataloader( # add cfg instead of many args
         batch_size=batch_size,
         shuffle=shuffle,
         num_workers=num_workers,
-        pin_memory=True,
+        pin_memory=torch.cuda.is_available(),
     )
 
 
-# ------------------------------------------------------------------------------
+# ==============================================================================
 # Patient-level train / val / test split
-# ------------------------------------------------------------------------------
+# ==============================================================================
 
 def split_dataset(
     data_dir: str,
@@ -316,8 +316,7 @@ def split_dataset(
     Returns
     -------
     train_samples, val_samples, test_samples : list of (Path, int)
-        Three (path, label) lists ready to pass as ``samples=`` to
-        :class:`PMGDataset`.
+        Three (path, label)
     """
     full = PMGDataset(data_dir=data_dir, pmg_negative_mode=pmg_negative_mode)
 
@@ -343,86 +342,3 @@ def split_dataset(
         return [full.samples[i] for pid in pids for i in patient_map[pid]]
 
     return _collect(train_pids), _collect(val_pids), _collect(test_pids)
-
-
-# ------------------------------------------------------------------------------
-# One-call convenience factory
-# ------------------------------------------------------------------------------
-
-def create_pmg_dataloader( ## add cfg instead of many args
-    data_dir: str,
-    batch_size: int,
-    crop_size: int,
-    scale: tuple,
-    mean=None,
-    std=None,
-    pmg_negative_mode: str = "correct",
-    num_workers: int = 4,
-    is_training: bool = True,
-) -> DataLoader:
-    """
-    Build the full data pipeline in one call.
-
-    Combines :func:`data_augmentation`, :class:`PMGDataset`, and
-    :func:`get_dataloader` into a single convenience function suitable
-    for use inside a training script or Hydra config.
-
-    Parameters
-    ----------
-    data_dir : str
-        Root directory of the processed dataset (see module docstring).
-    batch_size : int
-        Samples per batch.
-    crop_size : int
-        Spatial size passed to :func:`data_augmentation`.
-    scale : tuple of (float, float)
-        Random-crop scale range (training only).
-    mean : sequence of float, optional
-        Normalisation means.  Defaults to ImageNet values if ``None``
-        is passed through to ``transforms.Normalize``.
-    std : sequence of float, optional
-        Normalisation standard deviations.
-    pmg_negative_mode : {"paper", "correct"}
-        Passed directly to :class:`PMGDataset`.  Default: ``"correct"``.
-    num_workers : int, optional
-        DataLoader worker count.  Default: 4.
-    is_training : bool, optional
-        Selects the augmentation pipeline and disables shuffle for eval.
-        Default: ``True``.
-
-    Returns
-    -------
-    DataLoader
-        Fully configured dataloader ready for a training / eval loop.
-
-    Example
-    -------
-    >>> train_loader = create_pmg_dataloader(
-    ...     data_dir="data/PPMR_default",
-    ...     batch_size=32,
-    ...     crop_size=224,
-    ...     scale=(0.8, 1.0),
-    ...     mean=[0.485, 0.456, 0.406],
-    ...     std=[0.229, 0.224, 0.225],
-    ...     pmg_negative_mode="correct",
-    ...     is_training=True,
-    ... )
-    """
-    transform = data_augmentation(
-        crop_size=crop_size,
-        scale=scale,
-        mean=mean,
-        std=std,
-        is_training=is_training,
-    )
-    dataset = PMGDataset(
-        data_dir=data_dir,
-        transform=transform,
-        pmg_negative_mode=pmg_negative_mode,
-    )
-    return get_dataloader(
-        dataset=dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        shuffle=is_training,
-    )

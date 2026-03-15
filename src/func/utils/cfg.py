@@ -4,6 +4,10 @@ from dataclasses import asdict
 
 from src.config.preprocessing_config import PreprocessingConfig
 
+# =============================================================================
+# Config conversion utilities
+# =============================================================================
+
 def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
     """Convert Hydra DictConfig to PreprocessingConfig dataclass."""
     from src.config.preprocessing_config import (
@@ -35,6 +39,10 @@ def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
         ),
         convert_to_grayscale=cfg.preprocessing.convert_to_grayscale,
     )
+
+# =============================================================================
+# Helper function to convert dataclass to dict for logging
+# =============================================================================
 
 def _config_to_dict(config: PreprocessingConfig) -> dict:
     """Convert config to serializable dict for logging."""

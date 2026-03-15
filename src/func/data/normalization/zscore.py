@@ -14,6 +14,9 @@ Example:
 """
 import numpy as np
 
+# =============================================================================
+# Z-score normalization function
+# =============================================================================
 
 def normalize_zscore(
     image: np.ndarray,

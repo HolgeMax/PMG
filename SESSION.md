@@ -188,7 +188,7 @@ Full module-level docstring added covering:
 - `pmg_negative_mode` semantics
 - Public API summary
 
-Per-function/class docstrings added for: `_parse_raw_label`, `PMGDataset`, `PMGDataset._assign_label`, `PMGDataset.__len__`, `PMGDataset.__getitem__`, `data_augmentation`, `get_dataloader`, `create_pmg_dataloader`.
+Per-function/class docstrings added for: `_parse_raw_label`, `PMGDataset`, `PMGDataset._assign_label`, `PMGDataset.__len__`, `PMGDataset.__getitem__`, `data_augmentation`, `get_dataloader`.
 
 #### `src/cli/train.py` — training loop scaffolded
 
