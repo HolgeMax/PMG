@@ -96,7 +96,7 @@ class PMGDataset(Dataset):
         data_dir: str = None,
         transform=None,
         pmg_negative_mode: str = "correct",
-        samples: list = None,           # pre-built list from split_dataset()
+        samples: list = None,         
     ):
         if pmg_negative_mode not in ("paper", "correct"):
             raise ValueError("pmg_negative_mode must be 'paper' or 'correct'")
@@ -105,7 +105,7 @@ class PMGDataset(Dataset):
         self.pmg_negative_mode = pmg_negative_mode
 
         if samples is not None:
-            # fast path: use a pre-built (path, label) list from split_dataset()
+            # use a pre-built (path, label) list from split_dataset()
             self.samples = samples
             return
 

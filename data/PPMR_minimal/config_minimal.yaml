@@ -19,7 +19,39 @@ preprocessing:
     high_threshold: 200
     aperture_size: 3
     blend_alpha: 0.05
+data_loader:
+  data_dir: data/PPMR_default
+  crop_size: 224
+  scale:
+  - 0.8
+  - 1.0
+  mean:
+  - 0.485
+  - 0.456
+  - 0.406
+  std:
+  - 0.229
+  - 0.224
+  - 0.225
+  pmg_negative_mode: correct
+model:
+  name: resnet101
+  pretrained: true
+  dropout_p: 0.5
+  freeze_backbone: true
+train:
+  batch_size: 32
+  num_epochs: 20
+  learning_rate: 0.0001
+  weight_decay: 1.0e-05
+  num_workers: 4
+  device: cuda
+  is_training: true
+  val_frac: 0.15
+  test_frac: 0.15
+  seed: 42
 input_path: data/PPMR
-output_path: data/PPMR_minimal
+output_path: data/PPMR_${hydra:runtime.choices.preprocessing}
 slice_idx: null
 recursive: true
+edge_first: true

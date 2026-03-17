@@ -70,6 +70,28 @@ Defined in `hydra/preprocessing/`:
 | `light` | d=5, σ=50/50 | 2.0 | 0.15 | Less blur, sharper edges |
 | `minimal` | d=3, σ=25/25 | 1.5 | 0.05 | Preserve original detail |
 | `no_filter` | d=1, σ=1/1 | 2.0 | 0.00 | Maximum preservation |
+| `no_bilateral` | — (skipped) | 1.5 | 0.05 | Test if bilateral filter helps |
+
+### Order flag: `edge_first`
+
+The top-level `edge_first` flag (default: `false`) swaps the order of Canny and bilateral filtering. Only active when a preset that includes bilateral is used.
+
+| `preprocessing` | `edge_first` | Pipeline order |
+|----------------|-------------|----------------|
+| `default` | `false` | … → bilateral → canny |
+| `default` | `true` | … → canny → bilateral |
+| `no_bilateral` | *(ignored)* | … → canny |
+
+```bash
+# Normal order (bilateral → canny)
+uv run preprocess input_path=data/nii_test/file.nii preprocessing=default
+
+# Reversed order (canny → bilateral)
+uv run preprocess input_path=data/nii_test/file.nii preprocessing=default edge_first=true
+
+# Skip bilateral entirely
+uv run preprocess input_path=data/nii_test/file.nii preprocessing=no_bilateral
+```
 
 ---
 
@@ -171,9 +193,12 @@ Entropy change: ...
 uv run preprocess input_path=data/nii_test/file.nii preprocessing=default
 
 # Ablation: disable one step at a time
-uv run preprocess input_path=data/nii_test/file.nii bilateral.diameter=1   # no bilateral
-uv run preprocess input_path=data/nii_test/file.nii canny.blend_alpha=0.0  # no edges
-uv run preprocess input_path=data/nii_test/file.nii clahe.clip_limit=1.0   # weak CLAHE
+uv run preprocess input_path=data/nii_test/file.nii preprocessing=no_bilateral  # skip bilateral
+uv run preprocess input_path=data/nii_test/file.nii canny.blend_alpha=0.0       # no edges
+uv run preprocess input_path=data/nii_test/file.nii clahe.clip_limit=1.0        # weak CLAHE
+
+# Test if bilateral filter order matters
+uv run preprocess input_path=data/nii_test/file.nii preprocessing=default edge_first=true
 
 # Reproduce a past result
 cat results/BraTS20_Training_022_t1_config_light.yaml   # check saved config

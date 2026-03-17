@@ -17,6 +17,7 @@ def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
         NormalizationConfig,
     )
 
+    bilateral_cfg = cfg.preprocessing.get("bilateral", None)
     return PreprocessingConfig(
         normalization=NormalizationConfig(
             method=cfg.preprocessing.normalization.method,
@@ -27,10 +28,10 @@ def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
             tile_grid_size=tuple(cfg.preprocessing.clahe.tile_grid_size),
         ),
         bilateral=BilateralFilterConfig(
-            diameter=cfg.preprocessing.bilateral.diameter,
-            sigma_color=cfg.preprocessing.bilateral.sigma_color,
-            sigma_space=cfg.preprocessing.bilateral.sigma_space,
-        ),
+            diameter=bilateral_cfg.diameter,
+            sigma_color=bilateral_cfg.sigma_color,
+            sigma_space=bilateral_cfg.sigma_space,
+        ) if bilateral_cfg is not None else None,
         canny=CannyConfig(
             low_threshold=cfg.preprocessing.canny.low_threshold,
             high_threshold=cfg.preprocessing.canny.high_threshold,
@@ -49,7 +50,7 @@ def _config_to_dict(config: PreprocessingConfig) -> dict:
     return {
         "normalization": asdict(config.normalization),
         "clahe": asdict(config.clahe),
-        "bilateral": asdict(config.bilateral),
+        "bilateral": asdict(config.bilateral) if config.bilateral is not None else None,
         "canny": asdict(config.canny),
         "convert_to_grayscale": config.convert_to_grayscale,
     }

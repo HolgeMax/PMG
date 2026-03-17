@@ -85,6 +85,5 @@ PMG/
     │       ├── cfg.py                 # Config utilities
     │       └── loader.py              # Data loading helpers
     └── main/
-        ├── configurable_pipeline.py   # preprocess_image()
-        └── configurable_train.py      # Training orchestration
+        └── configurable_pipeline.py   # preprocess_image()
 ```

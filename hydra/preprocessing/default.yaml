@@ -1,6 +1,5 @@
 # @package _global_.preprocessing
-# Default preprocessing settings (matching Guha & Bhandage 2025 paper)
-
+# Default preprocessing settings
 convert_to_grayscale: true
 
 normalization:

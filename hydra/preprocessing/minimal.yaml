@@ -12,9 +12,9 @@ clahe:
   tile_grid_size: [8, 8]
 
 bilateral:
-  diameter: 2  # Minimal smoothing
-  sigma_color: 25.0
-  sigma_space: 25.0
+  diameter: 2  # Minimal smoothing # reduce from 9
+  sigma_color: 25.0 # reduce from 75.0
+  sigma_space: 25.0 # reduce from 75.0
 
 canny:
   low_threshold: 50

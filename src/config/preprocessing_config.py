@@ -11,7 +11,7 @@ Example:
     2.0
 """
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -86,7 +86,7 @@ class PreprocessingConfig:
 
     normalization: NormalizationConfig = field(default_factory=NormalizationConfig)
     clahe: CLAHEConfig = field(default_factory=CLAHEConfig)
-    bilateral: BilateralFilterConfig = field(default_factory=BilateralFilterConfig)
+    bilateral: Optional[BilateralFilterConfig] = None
     canny: CannyConfig = field(default_factory=CannyConfig)
     convert_to_grayscale: bool = True
 

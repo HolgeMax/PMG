@@ -1,5 +1,5 @@
 # @package _global_.preprocessing
-# No filtering - only normalization and contrast enhancement
+# No bilateral filter - only normalization and light CLAHE
 
 convert_to_grayscale: true
 
@@ -8,16 +8,12 @@ normalization:
   output_range: [0.0, 1.0]
 
 clahe:
-  clip_limit: 2.0
+  clip_limit: 1.5  # Gentler contrast enhancement
   tile_grid_size: [8, 8]
 
-bilateral:
-  diameter: 1  # Disable spatial filtering 
-  sigma_color: 1.0
-  sigma_space: 1.0
 
 canny:
   low_threshold: 50
   high_threshold: 200
   aperture_size: 3
-  blend_alpha: 0.0  # No edge blending
+  blend_alpha: 0.05  # Very subtle edge enhancement

@@ -6,20 +6,20 @@ preprocessing:
     - 0.0
     - 1.0
   clahe:
-    clip_limit: 2.0
+    clip_limit: 1.5
     tile_grid_size:
     - 8
     - 8
   bilateral:
-    diameter: 9
-    sigma_color: 75.0
-    sigma_space: 75.0
+    diameter: 2
+    sigma_color: 25.0
+    sigma_space: 25.0
   canny:
     low_threshold: 50
     high_threshold: 200
     aperture_size: 3
-    blend_alpha: 0.2
+    blend_alpha: 0.05
 input_path: data/PPMR
-output_path: data/PPMR_default
+output_path: data/PPMR_minimal
 slice_idx: null
 recursive: true

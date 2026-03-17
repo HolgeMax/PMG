@@ -46,6 +46,7 @@ class PipelineLog(TypedDict):
 def preprocess_image(
     image: np.ndarray,
     config: PreprocessingConfig,
+    edge_first: bool = False,
 ) -> tuple[np.ndarray, PipelineLog]:
     """Apply full preprocessing pipeline with configurable parameters.
 
@@ -91,30 +92,47 @@ def preprocess_image(
     steps_applied.append("clahe")
     logger.info("Applied CLAHE (clip=%s)", config.clahe.clip_limit)
 
-    # Step 3: Bilateral filter
-    result = apply_bilateral_filter(
-        result,
-        diameter=config.bilateral.diameter,
-        sigma_color=config.bilateral.sigma_color,
-        sigma_space=config.bilateral.sigma_space,
-    )
-    steps_applied.append("bilateral")
-    logger.info("Applied bilateral filter (d=%s)", config.bilateral.diameter)
+    # Step 3: Bilateral filter (and optional order swap with Canny)
+    # edge_first only applies when bilateral is also active — the point is to test order, not skip bilateral
+    if edge_first and config.bilateral is not None:
+        result = detect_edges_canny(
+            result,
+            low_threshold=config.canny.low_threshold,
+            high_threshold=config.canny.high_threshold,
+            aperture_size=config.canny.aperture_size,
+            blend_alpha=config.canny.blend_alpha,
+        )
+        steps_applied.append("edge_first")
+        logger.info(
+            "Applied edge-first Canny (thresholds=%s/%s)",
+            config.canny.low_threshold,
+            config.canny.high_threshold,
+        )
+    if config.bilateral is not None:
+        result = apply_bilateral_filter(
+            result,
+            diameter=config.bilateral.diameter,
+            sigma_color=config.bilateral.sigma_color,
+            sigma_space=config.bilateral.sigma_space,
+        )
+        steps_applied.append("bilateral")
+        logger.info("Applied bilateral filter (d=%s)", config.bilateral.diameter)
 
     # Step 4: Canny edge detection
-    result = detect_edges_canny(
-        result,
-        low_threshold=config.canny.low_threshold,
-        high_threshold=config.canny.high_threshold,
-        aperture_size=config.canny.aperture_size,
-        blend_alpha=config.canny.blend_alpha,
-    )
-    steps_applied.append("canny")
-    logger.info(
-        "Applied Canny (thresholds=%s/%s)",
-        config.canny.low_threshold,
-        config.canny.high_threshold,
-    )
+    if not edge_first:  # Only apply if not already applied as edge-first
+        result = detect_edges_canny(
+            result,
+            low_threshold=config.canny.low_threshold,
+            high_threshold=config.canny.high_threshold,
+            aperture_size=config.canny.aperture_size,
+            blend_alpha=config.canny.blend_alpha,
+        )
+        steps_applied.append("canny")
+        logger.info(
+            "Applied Canny (thresholds=%s/%s)",
+            config.canny.low_threshold,
+            config.canny.high_threshold,
+        )
 
     log["steps_applied"] = steps_applied
     log["output_shape"] = result.shape

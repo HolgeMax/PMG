@@ -1,3 +1,43 @@
+### Session 12 - 17.03.26
+
+#### Preprocessing Ablation: no_bilateral Preset, edge_first Flag & Notebook Plot Improvements
+
+**New hydra preset — no_bilateral:**
+- Added `hydra/preprocessing/no_bilateral.yaml` to run the pipeline with CLAHE and Canny only, skipping the bilateral filter entirely.
+- This allows direct ablation comparison of bilateral vs. no-bilateral preprocessing paths without touching any other parameter.
+
+**Pipeline logic fixes in `src/main/configurable_pipeline.py`:**
+- Added `edge_first: bool = False` parameter to `preprocess_image()` so callers can request that edge detection runs before the bilateral filter rather than after.
+- `edge_first` is guarded: it only has an effect when `bilateral` is also configured, preventing silent no-ops on configs that omit the filter.
+- Removed a stale `config.edge_first` attribute reference that no longer existed on the config object; the function parameter is now the sole source of truth.
+
+**Config fixes in `src/config/preprocessing_config.py`:**
+- Added `Optional` to the import list (was missing, causing a runtime error when `bilateral` was `None`).
+- Changed the `bilateral` field default from `BilateralFilterConfig()` (always-on) to `None` so that presets omitting `bilateral` in their yaml correctly produce a pipeline with no bilateral step.
+
+**Config utility fixes in `src/func/utils/cfg.py`:**
+- `config_to_preprocessing_config`: reads the `bilateral` key only when it is present in the yaml dict (uses `.get()`), preventing a `KeyError` when loading `no_bilateral.yaml`.
+- `_config_to_dict`: handles `bilateral=None` gracefully so serialization does not crash on configs that omit the filter.
+
+**Hydra root config updates (`hydra/config.yaml`):**
+- Added top-level `edge_first: false` flag so the option is visible and overridable from the CLI without modifying any preset file.
+- Fixed `output_path` to use `${hydra:runtime.choices.preprocessing}` so the output directory name automatically reflects the active preset (e.g., `no_bilateral`, `default`).
+
+**Documentation update (`how-to-run-experiments.md`):**
+- Added `no_bilateral` row to the presets reference table.
+- Added a new "Order flag: edge_first" section with a decision table showing which pipeline order results from each combination of `bilateral` and `edge_first`, plus CLI override examples.
+- Updated ablation workflow examples to cover the new preset and flag.
+
+**Notebook improvements (`notebooks/JPEG_exploration.ipynb`):**
+- Last section refactored: split a single combined comparison plot into Plot 1 (PMG group) and Plot 2 (Control group) for cleaner per-group analysis.
+- Added Plot 3: a single-subject detail figure featuring a bounding box drawn on the full slice and a zoomed inset, shown for both one PMG and one Control subject.
+
+**Pipeline verification:**
+- Case 1 (no bilateral): grayscale -> normalization -> clahe -> canny — confirmed working end-to-end.
+- Case 2 (edge first): grayscale -> normalization -> clahe -> edge_first -> bilateral — confirmed working end-to-end.
+
+---
+
 ## Daily Summary - 11.03.26 - 1 session registered
 
 **Key Accomplishments:**
