@@ -17,28 +17,33 @@ def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
         NormalizationConfig,
     )
 
-    bilateral_cfg = cfg.preprocessing.get("bilateral", None)
+    pre = cfg.preprocessing
+    norm_cfg      = pre.get("normalization", None)
+    clahe_cfg     = pre.get("clahe", None)
+    bilateral_cfg = pre.get("bilateral", None)
+    canny_cfg     = pre.get("canny", None)
+
     return PreprocessingConfig(
         normalization=NormalizationConfig(
-            method=cfg.preprocessing.normalization.method,
-            output_range=tuple(cfg.preprocessing.normalization.output_range),
-        ),
+            method=norm_cfg.method,
+            output_range=tuple(norm_cfg.output_range),
+        ) if norm_cfg is not None else NormalizationConfig(),
         clahe=CLAHEConfig(
-            clip_limit=cfg.preprocessing.clahe.clip_limit,
-            tile_grid_size=tuple(cfg.preprocessing.clahe.tile_grid_size),
-        ),
+            clip_limit=clahe_cfg.clip_limit,
+            tile_grid_size=tuple(clahe_cfg.tile_grid_size),
+        ) if clahe_cfg is not None else None,
         bilateral=BilateralFilterConfig(
             diameter=bilateral_cfg.diameter,
             sigma_color=bilateral_cfg.sigma_color,
             sigma_space=bilateral_cfg.sigma_space,
         ) if bilateral_cfg is not None else None,
         canny=CannyConfig(
-            low_threshold=cfg.preprocessing.canny.low_threshold,
-            high_threshold=cfg.preprocessing.canny.high_threshold,
-            aperture_size=cfg.preprocessing.canny.aperture_size,
-            blend_alpha=cfg.preprocessing.canny.blend_alpha,
-        ),
-        convert_to_grayscale=cfg.preprocessing.convert_to_grayscale,
+            low_threshold=canny_cfg.low_threshold,
+            high_threshold=canny_cfg.high_threshold,
+            aperture_size=canny_cfg.aperture_size,
+            blend_alpha=canny_cfg.blend_alpha,
+        ) if canny_cfg is not None else CannyConfig(),
+        convert_to_grayscale=pre.get("convert_to_grayscale", True),
     )
 
 # =============================================================================
@@ -49,7 +54,7 @@ def _config_to_dict(config: PreprocessingConfig) -> dict:
     """Convert config to serializable dict for logging."""
     return {
         "normalization": asdict(config.normalization),
-        "clahe": asdict(config.clahe),
+        "clahe": asdict(config.clahe) if config.clahe is not None else None,
         "bilateral": asdict(config.bilateral) if config.bilateral is not None else None,
         "canny": asdict(config.canny),
         "convert_to_grayscale": config.convert_to_grayscale,

@@ -85,7 +85,7 @@ class PreprocessingConfig:
     """
 
     normalization: NormalizationConfig = field(default_factory=NormalizationConfig)
-    clahe: CLAHEConfig = field(default_factory=CLAHEConfig)
+    clahe: Optional[CLAHEConfig] = None
     bilateral: Optional[BilateralFilterConfig] = None
     canny: CannyConfig = field(default_factory=CannyConfig)
     convert_to_grayscale: bool = True

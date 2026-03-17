@@ -84,13 +84,14 @@ def preprocess_image(
     logger.info("Applied %s normalization", config.normalization.method)
 
     # Step 2: CLAHE
-    result = apply_clahe(
-        result,
-        clip_limit=config.clahe.clip_limit,
-        tile_grid_size=config.clahe.tile_grid_size,
-    )
-    steps_applied.append("clahe")
-    logger.info("Applied CLAHE (clip=%s)", config.clahe.clip_limit)
+    if config.clahe is not None: 
+        result = apply_clahe(
+            result,
+            clip_limit=config.clahe.clip_limit,
+            tile_grid_size=config.clahe.tile_grid_size,
+        )
+        steps_applied.append("clahe")
+        logger.info("Applied CLAHE (clip=%s)", config.clahe.clip_limit)
 
     # Step 3: Bilateral filter (and optional order swap with Canny)
     # edge_first only applies when bilateral is also active — the point is to test order, not skip bilateral

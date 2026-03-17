@@ -10,10 +10,6 @@ preprocessing:
     tile_grid_size:
     - 8
     - 8
-  bilateral:
-    diameter: 2
-    sigma_color: 25.0
-    sigma_space: 25.0
   canny:
     low_threshold: 50
     high_threshold: 200
@@ -50,8 +46,8 @@ train:
   val_frac: 0.15
   test_frac: 0.15
   seed: 42
-input_path: data/PPMR/PMGstudycaseslabelled/2/2cor_1/2cor_1_19_2.jpg
+input_path: data/PPMR
 output_path: data/PPMR_${hydra:runtime.choices.preprocessing}
 slice_idx: null
-recursive: false
+recursive: true
 edge_first: false

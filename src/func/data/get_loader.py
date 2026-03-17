@@ -130,8 +130,10 @@ class PMGDataset(Dataset):
         int or None
             ``0`` (HC), ``1`` (PMG), or ``None`` (exclude from dataset).
         """
-        # Control cases: folder membership determines the label
-        if "controlcases" in path.parts:
+        # Control cases: folder membership determines the label.
+        # Accept both the canonical name (preprocessed output) and the
+        # original PPMR source folder name (raw data).
+        if "controlcases" in path.parts or "PMGControlsEditedDec2021" in path.parts:
             return 0
 
         # PMG cases: decode from filename

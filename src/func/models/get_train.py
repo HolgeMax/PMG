@@ -86,8 +86,10 @@ def train(cfg):
     model.to(device)
 
     # --- Patient-level split ---
+    data_dir = cfg.data_loader.raw_data_dir if cfg.data_loader.train_raw else cfg.data_loader.data_dir
+    print(f"Training on {'raw' if cfg.data_loader.train_raw else 'preprocessed'} data: {data_dir}")
     train_samples, val_samples, test_samples = split_dataset(
-        data_dir         = cfg.data_loader.data_dir,
+        data_dir         = data_dir,
         val_frac         = cfg.train.val_frac,
         test_frac        = cfg.train.test_frac,
         seed             = cfg.train.seed,
