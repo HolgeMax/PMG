@@ -1,3 +1,55 @@
+### Session 13 - 17.03.26
+
+#### Training Pipeline Overhaul: Augmentation Toggle, Checkpointing, Metrics Logging & Evaluation Refactor
+
+**Data augmentation made optional (`hydra/config.yaml`, `src/main/get_train.py`):**
+- Added `data_loader.augment` boolean flag to the Hydra root config.
+- `get_train.py` reads the flag and conditionally applies augmentation transforms; when `false` the training loader uses the same deterministic transforms as validation/test, enabling clean ablations between augmented and raw-data runs.
+
+**Model checkpointing (`src/main/train.py`, `results/checkpoints/`):**
+- Training now saves two checkpoint files per run to `results/checkpoints/`:
+  - `best_<run_name>.pt` — model weights at the epoch with the lowest validation loss.
+  - `final_<run_name>.pt` — model weights at the end of the last epoch.
+- Checkpointing is integrated directly into the training loop without requiring external callbacks.
+
+**Epoch function refactor (`src/main/train.py`):**
+- Replaced separate `train_epoch()` and `eval_epoch()` functions with a single unified `_run_epoch()` function.
+- `_run_epoch()` collects predictions and targets inline during the forward pass, eliminating a second pass over the data for metric computation.
+- Reduces code duplication and ensures train/val/test metrics are computed identically.
+
+**Per-epoch CSV metrics logging (`results/metrics/`):**
+- After each epoch, a row is appended to a CSV file in `results/metrics/` containing: epoch, split (train/val/test), loss, accuracy, precision, recall, F1, and Cohen's Kappa.
+- One CSV file is created per run, named after the run configuration, allowing easy comparison across experiments.
+
+**New evaluation module (`src/func/evaluation/classification_metrics.py`):**
+- Created with four public functions:
+  - `compute_metrics(y_true, y_pred)` — returns a dict of accuracy, precision, recall, F1, Cohen's Kappa.
+  - `collect_predictions(model, loader, device)` — runs inference and returns stacked true/pred tensors.
+  - `print_metrics(metrics_dict)` — formatted console output of a metrics dict.
+  - `evaluate_model(model, loader, device)` — convenience wrapper combining the above two.
+- Updated `src/func/evaluation/__init__.py` to export all four functions from the new module.
+
+**Documentation rewrite (`how-to-run-experiments.md`):**
+- Condensed from verbose prose to a concise ~120-line reference covering: quickstart commands, config override examples, augmentation flag usage, checkpoint paths, and metrics file location.
+
+#### Key Files Modified
+- `hydra/config.yaml` — added `data_loader.augment` flag
+- `src/main/get_train.py` — conditional augmentation based on config flag
+- `src/main/train.py` — unified `_run_epoch()`, checkpointing, per-epoch CSV logging
+- `src/func/evaluation/classification_metrics.py` — new file with four evaluation helpers
+- `src/func/evaluation/__init__.py` — updated exports
+- `results/checkpoints/` — new directory for model checkpoints
+- `results/metrics/` — new directory for per-epoch CSV logs
+- `how-to-run-experiments.md` — rewritten to ~120 lines
+
+#### Open Items
+- Run end-to-end training with checkpointing and verify CSV metrics output
+- Validate FOV confound via naive CNN baseline experiment
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+- Run preprocessing ablation comparison across full PPMR dataset
+
+---
+
 ### Session 12 - 17.03.26
 
 #### Preprocessing Ablation: no_bilateral Preset, edge_first Flag & Notebook Plot Improvements
