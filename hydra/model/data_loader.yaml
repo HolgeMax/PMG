@@ -2,12 +2,12 @@
 # Accessible in code as cfg.data_loader.*
 #
 # pmg_negative_mode options:
-#   "correct" — label=2 → HC, label=3 excluded  (methodologically correct)
+#   "correct" — label=2 → HC, label=3 excluded   (methodologically correct)
 #   "paper"   — label=2 and label=3 → PMG        (replicates Guha & Bhandage 2025)
 
-data_dir: data/PPMR_default     # preprocessed data (used when train_raw: false)
-raw_data_dir: data/PPMR         # original PPMR data (used when train_raw: true)
-train_raw: false                 # set to true to train directly on raw (unprocessed) data
+data_dir: data/PPMR_default     # preprocessed data
+raw_data_dir: data/PPMR         # original PPMR data 
+train_raw: false                 # set to true to train directly on raw data
 crop_size: 224
 scale: [0.8, 1.0]
 mean: [0.485, 0.456, 0.406]  # ImageNet stats — required for pretrained backbone

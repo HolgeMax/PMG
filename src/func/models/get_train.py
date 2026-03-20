@@ -101,7 +101,7 @@ def train(cfg):
         pmg_negative_mode= cfg.data_loader.pmg_negative_mode,
     )
     print(f"Split dataset into {len(train_samples)} train, {len(val_samples)} val, and {len(test_samples)} test samples")
-    
+
     # --- Build dataloaders ---
     transform_kwargs = dict(
         crop_size = cfg.data_loader.crop_size,
@@ -121,7 +121,7 @@ def train(cfg):
     print(f"Created dataloaders with batch size {cfg.train.batch_size} and num_workers {cfg.train.num_workers}")
 
     # --- Optimizer ---
-    optimizer = Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=cfg.train.learning_rate)
+    optimizer = Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=cfg.train.learning_rate, weight_decay=cfg.train.weight_decay)
     print(f"Initialized Adam optimizer with learning rate {cfg.train.learning_rate}")
 
     # --- Output directory ---

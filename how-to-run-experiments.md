@@ -73,8 +73,8 @@ train.num_epochs       int     (default: 20)
 train.learning_rate    float   (default: 1e-4)
 train.weight_decay     float   (default: 1e-5)
 train.device           cuda | mps | cpu
-train.val_frac         float   (default: 0.15)
-train.test_frac        float   (default: 0.15)
+train.val_frac         float   (default: 0.2)
+train.test_frac        float   (default: 0.2)
 train.seed             int     (default: 42)
 ```
 

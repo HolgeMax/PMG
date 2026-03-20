@@ -1,5 +1,5 @@
 # Project Structure
-
+continue claude --resume c931a234-75c6-4cba-953c-fbcf5fa3b600
 ```
 PMG/
 ├── CLAUDE.md                          # AI agent instructions & project context
