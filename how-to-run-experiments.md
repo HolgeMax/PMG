@@ -53,8 +53,10 @@ uv run train                                             # defaults: ResNet101, 
 uv run train model.name=densenet201
 uv run train train.num_epochs=30 train.learning_rate=1e-3
 uv run train data_loader.train_raw=true                  # skip preprocessing
-uv run train data_loader.augment=false                   # no training-time augmentation
-uv run train data_loader.data_dir=data/PPMR_light        # different preprocessing preset
+uv run train data_loader.augment=false                            # no training-time augmentation
+uv run train data_loader.data_dir=data/PPMR_light                 # different preprocessing preset
+uv run train data_loader.balance_mode=post_split                  # correct: balance train split only
+uv run train data_loader.balance_mode=pre_split                   # paper: balance before split (incorrect)
 ```
 
 ## Parameters
@@ -85,11 +87,17 @@ data_loader.raw_data_dir       str    (raw PPMR root,    default: data/PPMR)
 data_loader.train_raw          true | false   (default: false)
 data_loader.augment            true | false   (default: true)
 data_loader.pmg_negative_mode  correct | paper
+data_loader.balance_mode       null | pre_split | post_split
 ```
 
 `pmg_negative_mode`:
 - `correct` — label=2 → HC, label=3 excluded
 - `paper` — all PMG-folder slices → positive (replicates Guha & Bhandage 2025)
+
+`balance_mode`:
+- `null` — no balancing, use full imbalanced dataset (default)
+- `pre_split` — undersample HC to match PMG count **before** the patient-level split (replicates likely Guha & Bhandage 2025 approach; methodologically incorrect)
+- `post_split` — undersample HC in the **train split only** after the patient-level split; val/test are untouched (methodologically correct)
 
 ## Multirun
 

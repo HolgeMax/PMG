@@ -94,11 +94,12 @@ def train(cfg):
     data_dir = cfg.data_loader.raw_data_dir if cfg.data_loader.train_raw else cfg.data_loader.data_dir
     print(f"Training on {'raw' if cfg.data_loader.train_raw else 'preprocessed'} data: {data_dir}")
     train_samples, val_samples, test_samples = split_dataset(
-        data_dir         = data_dir,
-        val_frac         = cfg.train.val_frac,
-        test_frac        = cfg.train.test_frac,
-        seed             = cfg.train.seed,
-        pmg_negative_mode= cfg.data_loader.pmg_negative_mode,
+        data_dir          = data_dir,
+        val_frac          = cfg.train.val_frac,
+        test_frac         = cfg.train.test_frac,
+        seed              = cfg.train.seed,
+        pmg_negative_mode = cfg.data_loader.pmg_negative_mode,
+        balance_mode      = cfg.data_loader.balance_mode,
     )
     print(f"Split dataset into {len(train_samples)} train, {len(val_samples)} val, and {len(test_samples)} test samples")
 

@@ -14,3 +14,8 @@ mean: [0.485, 0.456, 0.406]  # ImageNet stats — required for pretrained backbo
 std: [0.229, 0.224, 0.225]
 pmg_negative_mode: correct
 augment: true                # set to false to disable training-time augmentation
+# balance_mode options:
+#   null          — no balancing (default)
+#   "pre_split"   — undersample HC before split (replicates Guha & Bhandage 2025, incorrect)
+#   "post_split"  — undersample HC in train split only after split (correct)
+balance_mode: null

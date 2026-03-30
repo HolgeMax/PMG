@@ -288,12 +288,37 @@ def get_dataloader( # add cfg instead of many args
 # Patient-level train / val / test split
 # ==============================================================================
 
+def _undersample_to_minority(
+    samples: list[tuple[Path, int]],
+    rng: random.Random,
+) -> list[tuple[Path, int]]:
+    """Randomly drop HC (label=0) samples until len(HC) == len(PMG).
+
+    Parameters
+    ----------
+    samples : list of (Path, int)
+        Full sample list to balance.
+    rng : random.Random
+        Seeded RNG for reproducibility.
+
+    Returns
+    -------
+    list of (Path, int)
+        All PMG samples plus a random equal-sized subset of HC samples.
+    """
+    minority = [s for s in samples if s[1] == 1]
+    majority = [s for s in samples if s[1] == 0]
+    kept = rng.sample(majority, min(len(minority), len(majority)))
+    return minority + kept
+
+
 def split_dataset(
     data_dir: str,
     val_frac: float = 0.15,
     test_frac: float = 0.15,
     seed: int = 42,
     pmg_negative_mode: str = "correct",
+    balance_mode: str | None = None,
 ) -> tuple[list, list, list]:
     """
     Split all samples in *data_dir* into train / val / test at the patient level.
@@ -314,13 +339,29 @@ def split_dataset(
         Random seed for reproducible shuffling.
     pmg_negative_mode : str
         Passed to :class:`PMGDataset` for label assignment.
+    balance_mode : {None, "pre_split", "post_split"}
+        ``None``         — no balancing (default, preserves original behaviour).
+        ``"pre_split"``  — undersample HC before building patient groups;
+                           replicates the likely approach of Guha & Bhandage
+                           (2025) but mixes balancing with splitting (incorrect).
+        ``"post_split"`` — undersample HC in the train split only after the
+                           patient-level split; val/test are untouched
+                           (methodologically correct).
 
     Returns
     -------
     train_samples, val_samples, test_samples : list of (Path, int)
-        Three (path, label)
+        Three (path, label) lists.
     """
+    _valid = {None, "pre_split", "post_split"}
+    if balance_mode not in _valid:
+        raise ValueError(f"balance_mode must be one of {_valid}, got {balance_mode!r}")
+
     full = PMGDataset(data_dir=data_dir, pmg_negative_mode=pmg_negative_mode)
+    rng  = random.Random(seed)
+
+    if balance_mode == "pre_split":
+        full.samples = _undersample_to_minority(full.samples, rng)
 
     # group sample indices by patient ID (first "_"-field of the stem)
     patient_map: dict[str, list[int]] = defaultdict(list)
@@ -329,7 +370,6 @@ def split_dataset(
         patient_map[pid].append(idx)
 
     patients = list(patient_map.keys())
-    rng = random.Random(seed)
     rng.shuffle(patients)
 
     n = len(patients)
@@ -340,7 +380,11 @@ def split_dataset(
     val_pids   = set(patients[n_test:n_test + n_val])
     train_pids = set(patients[n_test + n_val:])
 
-    def _collect(pids):
+    def _collect(pids: set) -> list:
         return [full.samples[i] for pid in pids for i in patient_map[pid]]
 
-    return _collect(train_pids), _collect(val_pids), _collect(test_pids)
+    train_samples = _collect(train_pids)
+    if balance_mode == "post_split":
+        train_samples = _undersample_to_minority(train_samples, rng)
+
+    return train_samples, _collect(val_pids), _collect(test_pids)
