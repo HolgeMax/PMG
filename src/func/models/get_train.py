@@ -43,7 +43,7 @@ def _run_epoch(
     with ctx:
         for images, labels in dataloader:
             images, labels = images.to(device), labels.to(device)
-
+            print(images.shape)
             if training:
                 optimizer.zero_grad()
 

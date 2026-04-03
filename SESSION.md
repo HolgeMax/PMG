@@ -1,3 +1,37 @@
+### Session 14 - 03.04.26
+
+#### Intensity Distribution Analysis, Deterministic Split Fix & Data Quality Audit
+
+**New notebook — intensity distribution (`notebooks/intensity_distribution.ipynb`):**
+- Added `notebooks/intensity_distribution.ipynb` to visualise pixel intensity distributions across four categories: raw HC, raw PMG, preprocessed HC, and preprocessed PMG.
+- Layout uses five columns: the first four columns show the four categories side by side; a fifth column is dedicated to preprocessed PMG cases, rendered in purple (`#C77DFF`) to make the preprocessed PMG distribution visually distinct from the others.
+- The notebook provides a direct visual tool for assessing whether preprocessing changes the intensity profile of PMG vs. HC cases in a way that could introduce or remove confounds.
+
+**Deterministic patient-level split fix (`src/func/data/get_loader.py`, line 372):**
+- Changed `list(patient_map.keys())` to `sorted(patient_map.keys())` before the RNG shuffle step inside `split_dataset()`.
+- Python dictionaries do not guarantee insertion order across runs when the underlying filesystem traversal order varies (e.g., between macOS and Linux, or after inode changes).
+- The fix ensures that for a given `seed`, the train / val / test patient assignment is identical regardless of the order in which image files are discovered on disk, making the split fully reproducible across machines and runs.
+- This is critical for fair comparison between experiments run on raw vs. preprocessed data, where different directory layouts could otherwise yield different patient assignments.
+
+**Data quality issues identified (not fixed this session):**
+- `10cor_1_19__1.jpg` contains a double underscore in its filename. `_parse_raw_label()` uses `_`-splitting to extract the label token; the double underscore shifts the field positions and causes the file to be silently skipped (no label assigned) in both the raw and preprocessed datasets. One PMG slice is effectively invisible to all loaders.
+- `2control2cor_0_019_preprocessed_minimal.jpg` is absent from `PPMR_minimal/controlcases`. The preprocessed version of this control slice was never generated or was deleted. Any loader that expects the preprocessed dataset to mirror the raw dataset will silently drop this sample or raise a file-not-found error depending on error handling. Both issues are documented here for follow-up.
+
+#### Key Files Modified
+- `notebooks/intensity_distribution.ipynb` — new notebook: 5-column intensity distribution plot (raw HC, raw PMG, preprocessed HC, preprocessed PMG, preprocessed PMG highlighted)
+- `src/func/data/get_loader.py` — bug fix: `list(patient_map.keys())` → `sorted(patient_map.keys())` for deterministic patient-level splits
+- `notebooks/Metrics_exploration.ipynb` — updated metric CSV path from `resnet101_raw_metrics.csv` to `resnet101_raw_metrics_paper.csv`; added `CORRECT_PATH` pointing to `resnet101_raw_metrics_correct.csv`
+- `src/func/models/get_train.py` — modified (exact changes visible in git diff)
+
+#### Open Items
+- Fix `10cor_1_19__1.jpg` double-underscore filename so the slice is correctly parsed and included in both datasets
+- Investigate and restore `2control2cor_0_019_preprocessed_minimal.jpg` in `PPMR_minimal/controlcases`
+- Run end-to-end training with the deterministic-split fix applied and verify split assignments match between raw and preprocessed loaders
+- Validate FOV confound via naive CNN baseline experiment
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+
+---
+
 ### Session 13 - 17.03.26
 
 #### Training Pipeline Overhaul: Augmentation Toggle, Checkpointing, Metrics Logging & Evaluation Refactor

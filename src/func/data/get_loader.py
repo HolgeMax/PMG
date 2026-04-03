@@ -369,7 +369,7 @@ def split_dataset(
         pid = path.stem.split("_")[0]
         patient_map[pid].append(idx)
 
-    patients = list(patient_map.keys())
+    patients = sorted(patient_map.keys())
     rng.shuffle(patients)
 
     n = len(patients)
