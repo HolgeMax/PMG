@@ -125,7 +125,7 @@ Evaluates all checkpoints on the test set with a random black-box occlusion appl
 ```bash
 uv run ablation                                                  # defaults
 uv run ablation ablation.device=cuda
-uv run ablation ablation.checkpoint_dir=results/my_run
+uv run ablation ablation.checkpoint_dir=results/checkpoints
 uv run ablation ablation.box_size_frac=0.3
 ```
 

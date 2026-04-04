@@ -1,3 +1,30 @@
+### Session 15 - 04.04.26
+
+#### Test Metrics Bar Chart: Converted from Vertical to Horizontal Layout
+
+**Context — continuation from Session 14:**
+This was a short continuation session with a single pending task. In Session 14 the ablation study chart in `notebooks/Metrics_exploration.ipynb` had already been converted to a horizontal grouped bar chart. The test metrics chart in the same notebook was supposed to receive the same treatment, but the Edit tool rejected `.ipynb` files; the fix required the NotebookEdit tool which was not available at that point.
+
+**Fix applied (`notebooks/Metrics_exploration.ipynb`, cell `test_bar_chart`):**
+- Replaced `ax.bar()` (vertical bars, runs on x-axis) with `ax.barh()` (horizontal bars, runs on y-axis).
+- Metric labels moved from the x-axis to the y-axis; run labels moved from the y-axis tick positions to the y-axis.
+- Added `ax.invert_yaxis()` so the run list reads top-to-bottom in the order they are defined, consistent with typical table-style readability.
+- Grid switched from `axis="y"` (horizontal gridlines over vertical bars) to `axis="x"` (vertical gridlines over horizontal bars).
+- Figure height changed from a fixed value to `max(5, n * 0.6)` where `n` is the number of runs, so the chart scales gracefully when more experiment runs are added.
+- The chart now visually matches the ablation study chart already present in the notebook.
+
+#### Key Files Modified
+- `notebooks/Metrics_exploration.ipynb` — cell `test_bar_chart`: vertical grouped bar chart converted to horizontal grouped bar chart
+
+#### Open Items (carried forward from Session 14)
+- Fix `10cor_1_19__1.jpg` double-underscore filename so the slice is correctly parsed and included in both datasets
+- Investigate and restore `2control2cor_0_019_preprocessed_minimal.jpg` in `PPMR_minimal/controlcases`
+- Run end-to-end training with the deterministic-split fix applied and verify split assignments match between raw and preprocessed loaders
+- Validate FOV confound via naive CNN baseline experiment
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+
+---
+
 ### Session 14 - 03.04.26
 
 #### Intensity Distribution Analysis, Deterministic Split Fix & Data Quality Audit

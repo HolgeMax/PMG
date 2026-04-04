@@ -140,8 +140,13 @@ def _calculate_metrics(predictions: list, labels: list) -> dict:
 
 def _save_example(images: torch.Tensor) -> None:
     BASE = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "results", "ablation_study")
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "results", "ablation_study")
     )
     Path(BASE).mkdir(parents=True, exist_ok=True)
-    vutils.save_image(images[0].cpu(), os.path.join(BASE, "black_box_example.jpg"))
+    # Un-normalize the first image in the batch for visualization
+    mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+    std  = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+    img  = (images[0].cpu() * std + mean).clamp(0, 1)
+
+    vutils.save_image(img, os.path.join(BASE, "black_box_example.jpg"))
     print(f"Saved black-box example image to {BASE}/black_box_example.jpg")
