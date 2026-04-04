@@ -12,28 +12,51 @@ from torch.utils.data import DataLoader
 # -------------------------------------------------------
 
 def run_all_ckpts_ablation_study(
-    model: torch.nn.Module,
+    cfg,
     modified_data: list,
     checkpoint_dir: str,
     device: str = "cpu",
 ) -> dict:
-    """Evaluate model on pre-occluded data for every checkpoint in *checkpoint_dir*.
+    """Evaluate every checkpoint in *checkpoint_dir* on pre-occluded data.
+
+    The model architecture is inferred from each checkpoint's filename prefix
+    (``resnet101_*`` or ``densenet201_*``), falling back to ``cfg.model.name``.
+    This means a directory can contain checkpoints from both architectures.
 
     Args:
-        model: Model instance whose weights are replaced per checkpoint.
-        modified_data: List of (images, labels) tuples returned by :func:`make_black_box`.
+        cfg: Hydra DictConfig — used for dropout_p, freeze_backbone, and
+            model.name fallback.
+        modified_data: List of (images, labels) tuples from :func:`make_black_box`.
         checkpoint_dir: Directory containing ``.pt`` / ``.pth`` checkpoint files.
         device: PyTorch device string.
 
     Returns:
         Mapping of checkpoint filename → metric dict.
     """
+    from src.func.models.get_models import build_resnet101, build_densenet201
+
     metrics_dict = {}
-    for checkpoint_file in os.listdir(checkpoint_dir):
-        if checkpoint_file.endswith(".pt") or checkpoint_file.endswith(".pth"):
-            checkpoint_path = os.path.join(checkpoint_dir, checkpoint_file)
-            model = _load_model_params(model, checkpoint_path, device)
-            metrics_dict[checkpoint_file] = _evaluate_on_modified(model, modified_data, device)
+    for checkpoint_file in sorted(os.listdir(checkpoint_dir)):
+        if not (checkpoint_file.endswith(".pt") or checkpoint_file.endswith(".pth")):
+            continue
+
+        # Infer architecture from filename prefix; fall back to cfg
+        if checkpoint_file.startswith("densenet201"):
+            model = build_densenet201(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+        elif checkpoint_file.startswith("resnet101"):
+            model = build_resnet101(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+        else:
+            # Unknown prefix — use cfg.model.name
+            if cfg.model.name == "densenet201":
+                model = build_densenet201(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+            else:
+                model = build_resnet101(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+            print(f"  Warning: cannot infer architecture from '{checkpoint_file}', using cfg.model.name='{cfg.model.name}'")
+
+        checkpoint_path = os.path.join(checkpoint_dir, checkpoint_file)
+        print(f"  Evaluating {checkpoint_file} ...")
+        model = _load_model_params(model, checkpoint_path, device)
+        metrics_dict[checkpoint_file] = _evaluate_on_modified(model, modified_data, device)
     return metrics_dict
 
 

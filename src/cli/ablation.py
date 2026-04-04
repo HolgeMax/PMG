@@ -11,19 +11,10 @@ sys.path.insert(0, str(project_root))
 
 from src.func.data.get_loader import PMGDataset, data_augmentation, get_dataloader, split_dataset
 from src.func.evaluation.ablation_study import make_black_box, run_all_ckpts_ablation_study
-from src.func.models.get_models import build_densenet201, build_resnet101
 
 
 def run_ablation(cfg: DictConfig) -> None:
     device = "cuda" if cfg.ablation.device == "cuda" and torch.cuda.is_available() else "cpu"
-
-    name = cfg.model.name
-    if name == "resnet101":
-        model = build_resnet101(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
-    elif name == "densenet201":
-        model = build_densenet201(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
-    else:
-        raise ValueError(f"Unknown model '{name}'. Expected 'resnet101' or 'densenet201'.")
 
     _train, _val, test_samples = split_dataset(
         cfg.data_loader.data_dir,
@@ -56,7 +47,7 @@ def run_ablation(cfg: DictConfig) -> None:
     )
 
     results = run_all_ckpts_ablation_study(
-        model,
+        cfg,
         modified_data,
         cfg.ablation.checkpoint_dir,
         device,
