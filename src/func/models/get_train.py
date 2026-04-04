@@ -63,47 +63,63 @@ def _run_epoch(
     metrics  = compute_metrics(y_true, y_pred)
     return avg_loss, metrics
 
-def train(cfg):
 
-    requested = cfg.train.device
+def _select_device(requested: str) -> torch.device:
     if requested == "cuda" and torch.cuda.is_available():
-        device = torch.device("cuda")
-    elif requested == "mps" and torch.backends.mps.is_available():
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
+        return torch.device("cuda")
+    if requested == "mps" and torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
 
-    print(f"Using device: {device}")
 
-    # --- Build model ---
-    model_name      = cfg.model.name
+def _build_model(cfg) -> nn.Module:
+    name            = cfg.model.name
     dropout_p       = cfg.model.dropout_p
     freeze_backbone = cfg.model.freeze_backbone
+    if name == "resnet101":
+        return build_resnet101(dropout_p=dropout_p, freeze_backbone=freeze_backbone)
+    if name == "densenet201":
+        return build_densenet201(dropout_p=dropout_p, freeze_backbone=freeze_backbone)
+    raise ValueError(f"Unsupported model name: {name}")
 
-    if model_name == "resnet101":
-        model = build_resnet101(dropout_p=dropout_p, freeze_backbone=freeze_backbone)
-        print(f"Built ResNet-101 with dropout_p={dropout_p} and freeze_backbone={freeze_backbone}")
-    elif model_name == "densenet201":
-        model = build_densenet201(dropout_p=dropout_p, freeze_backbone=freeze_backbone)
-        print(f"Built DenseNet-201 with dropout_p={dropout_p} and freeze_backbone={freeze_backbone}")
-    else:
-        raise ValueError(f"Unsupported model name: {model_name}")
+
+# =============================================================================
+# Single-fold training
+# =============================================================================
+
+def train_one_fold(
+    cfg,
+    train_samples: list,
+    val_samples: list,
+    test_samples: list,
+    fold_tag: str = "",
+) -> dict:
+    """Train one fold and return the test metrics at the best-val-loss epoch.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Full Hydra config.
+    train_samples, val_samples, test_samples : list of (Path, int)
+        Pre-built sample lists (e.g. from split_dataset or kfold_split_patients).
+    fold_tag : str
+        Appended to checkpoint and CSV filenames, e.g. ``"fold1"``.
+        Empty string for single-run (non-cross-val) training.
+
+    Returns
+    -------
+    dict
+        Test metrics (accuracy, precision, recall, f1, cohen_kappa) recorded
+        at the epoch with the lowest validation loss.
+    """
+    device = _select_device(cfg.train.device)
+    print(f"Using device: {device}")
+
+    model = _build_model(cfg)
+    print(f"Built {cfg.model.name} — dropout_p={cfg.model.dropout_p}, freeze_backbone={cfg.model.freeze_backbone}")
     model.to(device)
 
-    # --- Patient-level split ---
-    data_dir = cfg.data_loader.raw_data_dir if cfg.data_loader.train_raw else cfg.data_loader.data_dir
-    print(f"Training on {'raw' if cfg.data_loader.train_raw else 'preprocessed'} data: {data_dir}")
-    train_samples, val_samples, test_samples = split_dataset(
-        data_dir          = data_dir,
-        val_frac          = cfg.train.val_frac,
-        test_frac         = cfg.train.test_frac,
-        seed              = cfg.train.seed,
-        pmg_negative_mode = cfg.data_loader.pmg_negative_mode,
-        balance_mode      = cfg.data_loader.balance_mode,
-    )
-    print(f"Split dataset into {len(train_samples)} train, {len(val_samples)} val, and {len(test_samples)} test samples")
-
-    # --- Build dataloaders ---
+    # --- Dataloaders ---
     transform_kwargs = dict(
         crop_size = cfg.data_loader.crop_size,
         scale     = tuple(cfg.data_loader.scale),
@@ -111,22 +127,26 @@ def train(cfg):
         std       = list(cfg.data_loader.std)  if cfg.data_loader.std  is not None else [0.229, 0.224, 0.225],
     )
     augment = cfg.data_loader.get("augment", True)
-    train_transform = data_augmentation(**transform_kwargs, is_training=augment)
-    eval_transform  = data_augmentation(**transform_kwargs, is_training=False)
     if not augment:
         print("Data augmentation disabled — using deterministic transform for training")
+    train_transform = data_augmentation(**transform_kwargs, is_training=augment)
+    eval_transform  = data_augmentation(**transform_kwargs, is_training=False)
 
     train_loader = get_dataloader(PMGDataset(samples=train_samples, transform=train_transform), batch_size=cfg.train.batch_size, shuffle=True,  num_workers=cfg.train.num_workers)
     val_loader   = get_dataloader(PMGDataset(samples=val_samples,   transform=eval_transform),  batch_size=cfg.train.batch_size, shuffle=False, num_workers=cfg.train.num_workers)
     test_loader  = get_dataloader(PMGDataset(samples=test_samples,  transform=eval_transform),  batch_size=cfg.train.batch_size, shuffle=False, num_workers=cfg.train.num_workers)
-    print(f"Created dataloaders with batch size {cfg.train.batch_size} and num_workers {cfg.train.num_workers}")
+    print(f"Samples — train: {len(train_samples)}, val: {len(val_samples)}, test: {len(test_samples)}")
 
     # --- Optimizer ---
-    optimizer = Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=cfg.train.learning_rate, weight_decay=cfg.train.weight_decay)
-    print(f"Initialized Adam optimizer with learning rate {cfg.train.learning_rate}")
+    optimizer = Adam(
+        filter(lambda p: p.requires_grad, model.parameters()),
+        lr=cfg.train.learning_rate,
+        weight_decay=cfg.train.weight_decay,
+    )
 
-    # --- Output directory ---
-    run_tag  = f"{model_name}_{'raw' if cfg.data_loader.train_raw else 'preprocessed'}"
+    # --- Output paths ---
+    suffix   = f"_{fold_tag}" if fold_tag else ""
+    run_tag  = f"{cfg.model.name}_{'raw' if cfg.data_loader.train_raw else 'preprocessed'}{suffix}"
     ckpt_dir = Path(cfg.get("checkpoint_dir", "results/checkpoints"))
     ckpt_dir.mkdir(parents=True, exist_ok=True)
     best_ckpt  = ckpt_dir / f"{run_tag}_best.pt"
@@ -143,7 +163,8 @@ def train(cfg):
         "test_loss",  "test_acc",  "test_precision",  "test_recall",  "test_f1",  "test_kappa",
     ]
 
-    best_val_loss = float("inf")
+    best_val_loss     = float("inf")
+    best_test_metrics = {}
 
     with open(csv_path, "w", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=csv_columns)
@@ -154,11 +175,11 @@ def train(cfg):
             val_loss,   val_m   = _run_epoch(model, val_loader,   device)
             test_loss,  test_m  = _run_epoch(model, test_loader,  device)
 
-            print(f"Epoch {epoch+1}/{cfg.train.num_epochs} - "
-                  f"Train Loss: {train_loss:.4f}  Acc: {train_m['accuracy']:.4f} - "
-                  f"Val Loss: {val_loss:.4f}  Acc: {val_m['accuracy']:.4f} - "
+            print(f"Epoch {epoch+1}/{cfg.train.num_epochs} — "
+                  f"Train Loss: {train_loss:.4f}  Acc: {train_m['accuracy']:.4f} | "
+                  f"Val Loss: {val_loss:.4f}  Acc: {val_m['accuracy']:.4f} | "
                   f"Test Loss: {test_loss:.4f}  Acc: {test_m['accuracy']:.4f}")
-            # write metrics 
+
             writer.writerow({
                 "epoch":            epoch + 1,
                 "train_loss":       round(train_loss, 6),
@@ -183,7 +204,8 @@ def train(cfg):
             fh.flush()
 
             if val_loss < best_val_loss:
-                best_val_loss = val_loss
+                best_val_loss     = val_loss
+                best_test_metrics = test_m
                 torch.save(model.state_dict(), best_ckpt)
 
     torch.save(model.state_dict(), final_ckpt)
@@ -191,9 +213,32 @@ def train(cfg):
     print(f"Saved final checkpoint → {final_ckpt}")
     print(f"Saved metrics CSV      → {csv_path}")
 
-# ==================================<============================================
+    return best_test_metrics
+
+
+# =============================================================================
+# Single-run entry point (unchanged public interface)
+# =============================================================================
+
+def train(cfg):
+    data_dir = cfg.data_loader.raw_data_dir if cfg.data_loader.train_raw else cfg.data_loader.data_dir
+    print(f"Training on {'raw' if cfg.data_loader.train_raw else 'preprocessed'} data: {data_dir}")
+
+    train_samples, val_samples, test_samples = split_dataset(
+        data_dir          = data_dir,
+        val_frac          = cfg.train.val_frac,
+        test_frac         = cfg.train.test_frac,
+        seed              = cfg.train.seed,
+        pmg_negative_mode = cfg.data_loader.pmg_negative_mode,
+        balance_mode      = cfg.data_loader.balance_mode,
+    )
+
+    train_one_fold(cfg, train_samples, val_samples, test_samples, fold_tag="")
+
+
+# =============================================================================
 # Test code to verify output shapes and parameter freezing
-# ==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
     print("Running shape tests (downloads pretrained weights on first run)...\n")

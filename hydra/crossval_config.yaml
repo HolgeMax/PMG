@@ -1,0 +1,16 @@
+defaults:
+  - model@data_loader: data_loader
+  - model@model: model
+  - model@train: train
+  - _self_
+
+crossval:
+  n_folds: 5
+  val_frac_of_train: 0.15   # fraction of non-test patients used for validation
+
+hydra:
+  run:
+    dir: results/crossval/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: results/crossval/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

@@ -1,0 +1,15 @@
+defaults:
+  - model@data_loader: data_loader
+  - model@model: model
+  - model@train: train
+  - _self_
+
+ablation:
+  checkpoint_dir: results/checkpoints   # directory with .pt / .pth files to evaluate
+  output_dir: results/ablation_study
+  device: cuda                          # cuda or cpu
+  box_size_frac: 0.2                    # occlusion box side as fraction of min(h, w)
+
+hydra:
+  run:
+    dir: results/ablation/${now:%Y-%m-%d}/${now:%H-%M-%S}

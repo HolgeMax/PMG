@@ -37,6 +37,8 @@ dependencies = [
 [project.scripts]
 preprocess = "src.cli.preprocess:preprocess_cli"
 train      = "src.cli.train:train_cli"
+ablation   = "src.cli.ablation:ablation_cli"
+crossval   = "src.cli.crossval:crossval_cli"
 
 
 # == Optional/Development Dependencies ==
