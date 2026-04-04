@@ -5,6 +5,7 @@ import torch
 import torchvision.utils as vutils
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 
 # -------------------------------------------------------
@@ -36,7 +37,8 @@ def run_all_ckpts_ablation_study(
     from src.func.models.get_models import build_resnet101, build_densenet201
 
     metrics_dict = {}
-    for checkpoint_file in sorted(os.listdir(checkpoint_dir)):
+    ckpt_files = [f for f in sorted(os.listdir(checkpoint_dir)) if f.endswith(".pt") or f.endswith(".pth")]
+    for checkpoint_file in tqdm(ckpt_files, desc="checkpoints"):
         if not (checkpoint_file.endswith(".pt") or checkpoint_file.endswith(".pth")):
             continue
 
@@ -109,7 +111,7 @@ def _evaluate_on_modified(
     all_predictions = []
     all_labels = []
     with torch.no_grad():
-        for images, labels in modified_data:
+        for images, labels in tqdm(modified_data, desc="eval", leave=False):
             images = images.to(device)
             outputs = model(images)
             predicted = (torch.sigmoid(outputs.squeeze(1)) >= 0.5).long()

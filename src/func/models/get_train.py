@@ -7,6 +7,7 @@ from pathlib import Path
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 from torch.optim import Adam
+from tqdm import tqdm
 
 from src.func.models.get_models import PMGHead, build_resnet101, build_densenet201
 from src.func.data.get_loader import PMGDataset, data_augmentation, get_dataloader, split_dataset
@@ -41,9 +42,8 @@ def _run_epoch(
 
     ctx = torch.enable_grad() if training else torch.no_grad()
     with ctx:
-        for images, labels in dataloader:
+        for images, labels in tqdm(dataloader, desc="train" if training else "eval", leave=False):
             images, labels = images.to(device), labels.to(device)
-            print(images.shape)
             if training:
                 optimizer.zero_grad()
 
@@ -170,7 +170,7 @@ def train_one_fold(
         writer = csv.DictWriter(fh, fieldnames=csv_columns)
         writer.writeheader()
 
-        for epoch in range(cfg.train.num_epochs):
+        for epoch in tqdm(range(cfg.train.num_epochs), desc="epochs"):
             train_loss, train_m = _run_epoch(model, train_loader, device, optimizer=optimizer)
             val_loss,   val_m   = _run_epoch(model, val_loader,   device)
             test_loss,  test_m  = _run_epoch(model, test_loader,  device)
