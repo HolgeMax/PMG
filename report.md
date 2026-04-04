@@ -84,7 +84,7 @@ The paper also evaluated alternatives to bilateral filtering (Non-Local Means, A
 
 ### Implementation Journey
 
-#### Session 1 (Gemini) — Initial Pipeline
+#### Session 1 - Initial Pipeline
 
 The first implementation created individual Python modules for each step:
 - `grayscale_conversion.py`, `min_max_normalization.py`, `clahe_enhancement.py`, `bilateral_filtering.py`, `canny_edge_detection.py`
@@ -96,7 +96,7 @@ The first implementation created individual Python modules for each step:
 
 These were fixed in the same session by switching to NumPy-based implementations.
 
-#### Session 2 (Claude Code) — Architecture Refactoring
+#### Session 2 - Architecture Refactoring
 
 The preprocessing code was completely refactored from flat scripts into a modular package:
 
