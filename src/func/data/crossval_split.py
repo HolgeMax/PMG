@@ -68,7 +68,9 @@ def kfold_split_patients(
         patient_map[pid].append(idx)
 
     patient_ids = sorted(patient_map.keys())
-    patient_paths = {pid: [full.samples[i][0] for i in patient_map[pid]] for pid in patient_ids}
+    patient_paths = {
+        pid: [full.samples[i][0] for i in patient_map[pid]] for pid in patient_ids
+    }
     patient_labels = [_patient_class(patient_paths[pid]) for pid in patient_ids]
 
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
@@ -76,7 +78,7 @@ def kfold_split_patients(
     for fold_idx, (train_val_idx, test_idx) in enumerate(
         skf.split(patient_ids, patient_labels)
     ):
-        test_pids  = {patient_ids[i] for i in test_idx}
+        test_pids = {patient_ids[i] for i in test_idx}
         train_val_pids = [patient_ids[i] for i in train_val_idx]
 
         # Carve out val from train_val patients
@@ -84,7 +86,7 @@ def kfold_split_patients(
         rng_fold = random.Random(seed + fold_idx)
         shuffled = train_val_pids.copy()
         rng_fold.shuffle(shuffled)
-        val_pids   = set(shuffled[:n_val])
+        val_pids = set(shuffled[:n_val])
         train_pids = set(shuffled[n_val:])
 
         def _collect(pids: set) -> list:
@@ -94,7 +96,7 @@ def kfold_split_patients(
         if balance_mode == "post_split":
             train_samples = _undersample_to_minority(train_samples, rng_fold)
 
-        val_samples  = _collect(val_pids)
+        val_samples = _collect(val_pids)
         test_samples = _collect(test_pids)
 
         print(

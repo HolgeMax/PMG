@@ -10,6 +10,7 @@ Example:
     >>> config.clahe.clip_limit
     2.0
 """
+
 from dataclasses import dataclass, field
 from typing import Optional, Tuple
 

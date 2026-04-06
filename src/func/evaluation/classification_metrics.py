@@ -19,6 +19,7 @@ from torch.utils.data import DataLoader
 # Inference
 # =============================================================================
 
+
 def collect_predictions(
     model: nn.Module,
     dataloader: DataLoader,
@@ -45,24 +46,27 @@ def collect_predictions(
         Flat lists of ground-truth and predicted class indices (0 or 1).
     """
     model.eval()
-    y_true, y_pred = [], []
+    all_labels, all_preds = [], []
 
     with torch.no_grad():
         for images, labels in dataloader:
             images = images.to(device)
-            logits = model(images).squeeze(1)          # (B,)
-            probs  = torch.sigmoid(logits)
-            preds  = (probs >= threshold).long()
+            logits = model(images).squeeze(1)  # (B,)
+            probs = torch.sigmoid(logits)
+            preds = (probs >= threshold).long()
 
-            y_true.extend(labels.tolist())
-            y_pred.extend(preds.cpu().tolist())
-
+            all_labels.append(labels)
+            all_preds.append(preds.cpu())
+        
+        y_true = torch.cat(all_labels).tolist()
+        y_pred = torch.cat(all_preds).tolist()
     return y_true, y_pred
 
 
 # =============================================================================
 # Metric computation
 # =============================================================================
+
 
 def compute_metrics(
     y_true: list[int],
@@ -82,39 +86,49 @@ def compute_metrics(
     -------
     dict with keys: accuracy, precision, recall, f1, cohen_kappa
     """
-    tp = sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 1)
-    tn = sum(1 for t, p in zip(y_true, y_pred) if t == 0 and p == 0)
-    fp = sum(1 for t, p in zip(y_true, y_pred) if t == 0 and p == 1)
-    fn = sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 0)
+    # 2×2 confusion matrix: cm[true_label, pred_label]
+    y_t = torch.tensor(y_true)
+    y_p = torch.tensor(y_pred)
+    cm = torch.bincount(y_t * 2 + y_p, minlength=4).reshape(2, 2)     
+    # cm:  [[TN, FP],
+    #      [FN, TP]] 
+    tn, fp, fn, tp = cm[0, 0].item(), cm[0, 1].item(), cm[1, 0].item(), cm[1, 1].item()
 
     n = len(y_true)
 
-    accuracy  = (tp + tn) / n if n > 0 else 0.0
+    accuracy = (tp + tn) / n if n > 0 else 0.0
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1        = (2 * precision * recall / (precision + recall)
-                 if (precision + recall) > 0 else 0.0)
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
     # Cohen's Kappa
     # p_e = expected agreement by chance
     p_pos = ((tp + fp) / n) * ((tp + fn) / n)
     p_neg = ((tn + fn) / n) * ((tn + fp) / n)
-    p_e   = p_pos + p_neg
+    p_e = p_pos + p_neg
     kappa = (accuracy - p_e) / (1 - p_e) if (1 - p_e) > 0 else 0.0
 
     return {
-        "accuracy":     accuracy,
-        "precision":    precision,
-        "recall":       recall,
-        "f1":           f1,
-        "cohen_kappa":  kappa,
-        "tp": tp, "tn": tn, "fp": fp, "fn": fn,
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "cohen_kappa": kappa,
+        "tp": tp,
+        "tn": tn,
+        "fp": fp,
+        "fn": fn,
     }
 
 
 # =============================================================================
 # Pretty-print
 # =============================================================================
+
 
 def print_metrics(metrics: dict[str, float], split: str = "") -> None:
     """Print a metrics dict in a readable table."""
@@ -125,12 +139,15 @@ def print_metrics(metrics: dict[str, float], split: str = "") -> None:
     print(f"  Recall:        {metrics['recall']:.4f}")
     print(f"  F1 Score:      {metrics['f1']:.4f}")
     print(f"  Cohen's Kappa: {metrics['cohen_kappa']:.4f}")
-    print(f"  TP={metrics['tp']}  TN={metrics['tn']}  FP={metrics['fp']}  FN={metrics['fn']}")
+    print(
+        f"  TP={metrics['tp']}  TN={metrics['tn']}  FP={metrics['fp']}  FN={metrics['fn']}"
+    )
 
 
 # =============================================================================
 # Convenience wrapper
 # =============================================================================
+
 
 def evaluate_model(
     model: nn.Module,

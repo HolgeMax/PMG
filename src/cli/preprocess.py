@@ -13,6 +13,7 @@ Usage — directory (flat):
 Usage — directory (recursive, e.g. PPMR patient tree):
     uv run preprocess input_path=data/PPMR/PMGstudycaseslabelled preprocessing=light recursive=true
 """
+
 import sys
 from pathlib import Path
 
@@ -28,12 +29,16 @@ sys.path.insert(0, str(project_root))
 from src.func.utils.loader import collect_input_files, process_one
 from src.func.utils.cfg import config_to_preprocessing_config
 
+
 # ── Entry point
-@hydra.main(version_base=None, config_path=str(project_root / "hydra"), config_name="config")
+@hydra.main(
+    version_base=None, config_path=str(project_root / "hydra"), config_name="config"
+)
 def main(cfg: DictConfig) -> None:
     """Run the preprocessing pipeline on a file or directory."""
     # Suppress per-step INFO logs from the pipeline during processing
     import logging
+
     logging.getLogger("src.main.configurable_pipeline").setLevel(logging.WARNING)
 
     # check if input path exists
@@ -65,7 +70,7 @@ def main(cfg: DictConfig) -> None:
     with open(config_path, "w") as f:
         f.write(OmegaConf.to_yaml(cfg))
 
-    # ── Process files 
+    # ── Process files
     print(f"\nInput  : {input_path}  ({'recursive' if recursive else 'flat'})")
     print(f"Files  : {len(files)}")
     print(f"Output : {cfg.output_path}\n")
@@ -75,7 +80,11 @@ def main(cfg: DictConfig) -> None:
     for file_path in tqdm(files, desc="Preprocessing", unit="file"):
         try:
             metrics = process_one(
-                file_path, preprocess_config, cfg.slice_idx, output_path, preset_name,
+                file_path,
+                preprocess_config,
+                cfg.slice_idx,
+                output_path,
+                preset_name,
                 input_root=input_path if input_path.is_dir() else None,
             )
             results.append(metrics)
@@ -83,16 +92,20 @@ def main(cfg: DictConfig) -> None:
             tqdm.write(f"  FAILED {file_path.name}: {exc}")
             failed.append(file_path.name)
 
-    # ── Summary 
+    # ── Summary
     print(f"\n{'─' * 70}")
     print(f"Done — {len(results)} succeeded, {len(failed)} failed")
     if results:
         psnr_vals = [r["psnr"] for r in results if np.isfinite(r["psnr"])]
         ssim_vals = [r["ssim"] for r in results]
-        print(f"  PSNR  mean ± std : {np.mean(psnr_vals):.2f} ± {np.std(psnr_vals):.2f} dB")
-        print(f"  SSIM  mean ± std : {np.mean(ssim_vals):.4f} ± {np.std(ssim_vals):.4f}")
+        print(
+            f"  PSNR  mean ± std : {np.mean(psnr_vals):.2f} ± {np.std(psnr_vals):.2f} dB"
+        )
+        print(
+            f"  SSIM  mean ± std : {np.mean(ssim_vals):.4f} ± {np.std(ssim_vals):.4f}"
+        )
     if failed:
-        print(f"\nFailed files:")
+        print("\nFailed files:")
         for name in failed:
             print(f"  {name}")
     print(f"Config saved to : {config_path}")

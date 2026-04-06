@@ -12,6 +12,7 @@ from tqdm import tqdm
 # Public API
 # -------------------------------------------------------
 
+
 def run_all_ckpts_ablation_study(
     cfg,
     modified_data: list,
@@ -37,28 +38,46 @@ def run_all_ckpts_ablation_study(
     from src.func.models.get_models import build_resnet101, build_densenet201
 
     metrics_dict = {}
-    ckpt_files = [f for f in sorted(os.listdir(checkpoint_dir)) if f.endswith(".pt") or f.endswith(".pth")]
+    ckpt_files = [
+        f
+        for f in sorted(os.listdir(checkpoint_dir))
+        if f.endswith(".pt") or f.endswith(".pth")
+    ]
     for checkpoint_file in tqdm(ckpt_files, desc="checkpoints"):
         if not (checkpoint_file.endswith(".pt") or checkpoint_file.endswith(".pth")):
             continue
 
         # Infer architecture from filename prefix; fall back to cfg
         if checkpoint_file.startswith("densenet201"):
-            model = build_densenet201(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+            model = build_densenet201(
+                dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone
+            )
         elif checkpoint_file.startswith("resnet101"):
-            model = build_resnet101(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+            model = build_resnet101(
+                dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone
+            )
         else:
             # Unknown prefix — use cfg.model.name
             if cfg.model.name == "densenet201":
-                model = build_densenet201(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
+                model = build_densenet201(
+                    dropout_p=cfg.model.dropout_p,
+                    freeze_backbone=cfg.model.freeze_backbone,
+                )
             else:
-                model = build_resnet101(dropout_p=cfg.model.dropout_p, freeze_backbone=cfg.model.freeze_backbone)
-            print(f"  Warning: cannot infer architecture from '{checkpoint_file}', using cfg.model.name='{cfg.model.name}'")
+                model = build_resnet101(
+                    dropout_p=cfg.model.dropout_p,
+                    freeze_backbone=cfg.model.freeze_backbone,
+                )
+            print(
+                f"  Warning: cannot infer architecture from '{checkpoint_file}', using cfg.model.name='{cfg.model.name}'"
+            )
 
         checkpoint_path = os.path.join(checkpoint_dir, checkpoint_file)
         print(f"  Evaluating {checkpoint_file} ...")
         model = _load_model_params(model, checkpoint_path, device)
-        metrics_dict[checkpoint_file] = _evaluate_on_modified(model, modified_data, device)
+        metrics_dict[checkpoint_file] = _evaluate_on_modified(
+            model, modified_data, device
+        )
     return metrics_dict
 
 
@@ -84,10 +103,10 @@ def make_black_box(
         batch_size, _ch, height, width = images.size()
         box_size = int(min(height, width) * box_size_frac)
 
-        for i in range(batch_size):
-            x_start = torch.randint(0, width - box_size, (1,)).item()
-            y_start = torch.randint(0, height - box_size, (1,)).item()
-            images[i, :, y_start:y_start + box_size, x_start:x_start + box_size] = 0
+        x_starts = torch.randint(0, width - box_size, (batch_size,)).tolist()
+        y_starts = torch.randint(0, height - box_size, (batch_size,)).tolist()
+        for i, (x, y) in enumerate(zip(x_starts, y_starts)):
+            images[i, :, y : y + box_size, x : x + box_size] = 0
 
         modified_data.append((images.cpu(), labels))
 
@@ -101,6 +120,7 @@ def make_black_box(
 # Internal helpers
 # -------------------------------------------------------
 
+
 def _evaluate_on_modified(
     model: torch.nn.Module,
     modified_data: list,
@@ -108,16 +128,18 @@ def _evaluate_on_modified(
 ) -> dict:
     model.to(device)
     model.eval()
-    all_predictions = []
-    all_labels = []
+    all_labels, all_pred = [], []
     with torch.no_grad():
         for images, labels in tqdm(modified_data, desc="eval", leave=False):
             images = images.to(device)
             outputs = model(images)
             predicted = (torch.sigmoid(outputs.squeeze(1)) >= 0.5).long()
-            all_predictions.extend(predicted.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
-    return _calculate_metrics(all_predictions, all_labels)
+            all_pred.append(predicted.cpu())
+            all_labels.append(labels)
+    return _calculate_metrics(
+        torch.cat(all_pred).tolist(),
+        torch.cat(all_labels).tolist(),
+    )
 
 
 def _load_model_params(
@@ -134,21 +156,27 @@ def _load_model_params(
 def _calculate_metrics(predictions: list, labels: list) -> dict:
     return {
         "accuracy": accuracy_score(labels, predictions),
-        "precision": precision_score(labels, predictions, average="weighted", zero_division=0),
-        "recall": recall_score(labels, predictions, average="weighted", zero_division=0),
+        "precision": precision_score(
+            labels, predictions, average="weighted", zero_division=0
+        ),
+        "recall": recall_score(
+            labels, predictions, average="weighted", zero_division=0
+        ),
         "f1_score": f1_score(labels, predictions, average="weighted", zero_division=0),
     }
 
 
 def _save_example(images: torch.Tensor) -> None:
     BASE = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "results", "ablation_study")
+        os.path.join(
+            os.path.dirname(__file__), "..", "..", "..", "results", "ablation_study"
+        )
     )
     Path(BASE).mkdir(parents=True, exist_ok=True)
     # Un-normalize the first image in the batch for visualization
     mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-    std  = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
-    img  = (images[0].cpu() * std + mean).clamp(0, 1)
+    std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+    img = (images[0].cpu() * std + mean).clamp(0, 1)
 
     vutils.save_image(img, os.path.join(BASE, "black_box_example.jpg"))
     print(f"Saved black-box example image to {BASE}/black_box_example.jpg")

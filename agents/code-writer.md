@@ -29,6 +29,15 @@ principles:
       Break early, name aggressively.
       One screenful per logical unit.
 
+  - name: vectorisation_over_loops
+    description: >
+      Never iterate element-wise over arrays, tensors, or label sequences
+      when a matrix or tensor operation exists.
+      Prefer torch/numpy primitives (bincount, scatter_add, boolean masking,
+      matmul) over Python-level for/generator loops on numeric data.
+      A loop over samples is a design smell — encode it as a comment explaining
+      why no vectorised form was possible.
+
   - name: readability_over_cleverness
     description: >
       Prefer clarity to abstraction.

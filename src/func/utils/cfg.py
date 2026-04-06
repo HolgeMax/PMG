@@ -1,5 +1,4 @@
-
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 from dataclasses import asdict
 
 from src.config.preprocessing_config import PreprocessingConfig
@@ -7,6 +6,7 @@ from src.config.preprocessing_config import PreprocessingConfig
 # =============================================================================
 # Config conversion utilities
 # =============================================================================
+
 
 def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
     """Convert Hydra DictConfig to PreprocessingConfig dataclass."""
@@ -18,37 +18,47 @@ def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
     )
 
     pre = cfg.preprocessing
-    norm_cfg      = pre.get("normalization", None)
-    clahe_cfg     = pre.get("clahe", None)
+    norm_cfg = pre.get("normalization", None)
+    clahe_cfg = pre.get("clahe", None)
     bilateral_cfg = pre.get("bilateral", None)
-    canny_cfg     = pre.get("canny", None)
+    canny_cfg = pre.get("canny", None)
 
     return PreprocessingConfig(
         normalization=NormalizationConfig(
             method=norm_cfg.method,
             output_range=tuple(norm_cfg.output_range),
-        ) if norm_cfg is not None else NormalizationConfig(),
+        )
+        if norm_cfg is not None
+        else NormalizationConfig(),
         clahe=CLAHEConfig(
             clip_limit=clahe_cfg.clip_limit,
             tile_grid_size=tuple(clahe_cfg.tile_grid_size),
-        ) if clahe_cfg is not None else None,
+        )
+        if clahe_cfg is not None
+        else None,
         bilateral=BilateralFilterConfig(
             diameter=bilateral_cfg.diameter,
             sigma_color=bilateral_cfg.sigma_color,
             sigma_space=bilateral_cfg.sigma_space,
-        ) if bilateral_cfg is not None else None,
+        )
+        if bilateral_cfg is not None
+        else None,
         canny=CannyConfig(
             low_threshold=canny_cfg.low_threshold,
             high_threshold=canny_cfg.high_threshold,
             aperture_size=canny_cfg.aperture_size,
             blend_alpha=canny_cfg.blend_alpha,
-        ) if canny_cfg is not None else CannyConfig(),
+        )
+        if canny_cfg is not None
+        else CannyConfig(),
         convert_to_grayscale=pre.get("convert_to_grayscale", True),
     )
+
 
 # =============================================================================
 # Helper function to convert dataclass to dict for logging
 # =============================================================================
+
 
 def _config_to_dict(config: PreprocessingConfig) -> dict:
     """Convert config to serializable dict for logging."""

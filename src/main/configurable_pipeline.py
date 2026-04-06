@@ -13,8 +13,8 @@ Example:
     >>> result.shape == img.shape
     True
 """
+
 import logging
-from dataclasses import asdict
 from typing import TypedDict
 
 import numpy as np
@@ -24,8 +24,6 @@ from src.func.data.bilateral import apply_bilateral_filter
 from src.func.data.clahe import apply_clahe
 from src.func.data.edge_detection.canny import detect_edges_canny
 from src.func.data.grayscale import convert_to_grayscale
-from src.func.data.normalization.min_max import normalize_min_max
-from src.func.data.normalization.zscore import normalize_zscore
 from src.func.data.normalization.apply_norm import _apply_normalization
 from src.func.utils.cfg import _config_to_dict
 
@@ -84,7 +82,7 @@ def preprocess_image(
     logger.info("Applied %s normalization", config.normalization.method)
 
     # Step 2: CLAHE
-    if config.clahe is not None: 
+    if config.clahe is not None:
         result = apply_clahe(
             result,
             clip_limit=config.clahe.clip_limit,

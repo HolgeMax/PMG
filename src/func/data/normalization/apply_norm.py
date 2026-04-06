@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from src.config.preprocessing_config import PreprocessingConfig
@@ -9,9 +8,8 @@ from src.func.data.normalization.zscore import normalize_zscore
 # Normalization
 # =============================================================================
 
-def _apply_normalization(
-    image: np.ndarray, config: PreprocessingConfig
-) -> np.ndarray:
+
+def _apply_normalization(image: np.ndarray, config: PreprocessingConfig) -> np.ndarray:
     """Apply configured normalization method."""
     method = config.normalization.method
     if method == "min_max":

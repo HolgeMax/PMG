@@ -10,6 +10,7 @@ Example:
     >>> compute_entropy(uniform)
     0.0
 """
+
 from typing import TypedDict
 
 import numpy as np
@@ -50,9 +51,7 @@ def compute_psnr(
     if data_range is None:
         data_range = _infer_data_range(original)
 
-    return float(
-        peak_signal_noise_ratio(original, processed, data_range=data_range)
-    )
+    return float(peak_signal_noise_ratio(original, processed, data_range=data_range))
 
 
 def compute_ssim(
@@ -79,9 +78,7 @@ def compute_ssim(
     if data_range is None:
         data_range = _infer_data_range(original)
 
-    return float(
-        structural_similarity(original, processed, data_range=data_range)
-    )
+    return float(structural_similarity(original, processed, data_range=data_range))
 
 
 def compute_entropy(image: np.ndarray, bins: int = 256) -> float:
@@ -117,12 +114,14 @@ def evaluate_preprocessing(
     orig_norm = _normalize_for_comparison(original)
     proc_norm = _normalize_for_comparison(processed)
 
+    entropy_orig = compute_entropy(original)
+    entropy_proc = compute_entropy(processed)
     return PreprocessingMetrics(
         psnr=compute_psnr(orig_norm, proc_norm, data_range=1.0),
         ssim=compute_ssim(orig_norm, proc_norm, data_range=1.0),
-        entropy_original=compute_entropy(original),
-        entropy_processed=compute_entropy(processed),
-        entropy_change=compute_entropy(processed) - compute_entropy(original),
+        entropy_original=entropy_orig,
+        entropy_processed=entropy_proc,
+        entropy_change=entropy_proc - entropy_orig,
     )
 
 

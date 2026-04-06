@@ -11,13 +11,9 @@ def _pty() -> bool:
     return not WINDOWS
 
 
-
-
 # Git helpers
 @task
 def git(ctx, message):
     ctx.run("git add .")
     ctx.run(f"git commit -m '{message}'")
     ctx.run("git push")
-
-

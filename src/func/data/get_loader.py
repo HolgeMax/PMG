@@ -13,6 +13,7 @@ from src.func.utils.loader import collect_input_files
 # Internal helpers
 # =============================================================================
 
+
 def _parse_raw_label(path: Path) -> int | None:
     """
     Extract the numeric label embedded in a PMG-case filename.
@@ -43,6 +44,7 @@ def _parse_raw_label(path: Path) -> int | None:
 # ==============================================================================
 # Dataset
 # ==============================================================================
+
 
 class PMGDataset(Dataset):
     """
@@ -87,16 +89,16 @@ class PMGDataset(Dataset):
     """
 
     # Raw label values embedded in PMG filenames
-    _RAW_PMG_POS   = 1   # PMG visible in this slice
-    _RAW_PMG_NEG   = 2   # PMG patient but no PMG visible here
-    _RAW_UNCERTAIN = 3   # uncertain / ambiguous annotation
+    _RAW_PMG_POS = 1  # PMG visible in this slice
+    _RAW_PMG_NEG = 2  # PMG patient but no PMG visible here
+    _RAW_UNCERTAIN = 3  # uncertain / ambiguous annotation
 
     def __init__(
         self,
         data_dir: str = None,
         transform=None,
         pmg_negative_mode: str = "correct",
-        samples: list = None,         
+        samples: list = None,
     ):
         if pmg_negative_mode not in ("paper", "correct"):
             raise ValueError("pmg_negative_mode must be 'paper' or 'correct'")
@@ -194,7 +196,8 @@ class PMGDataset(Dataset):
 # Transform factory
 # ==============================================================================
 
-def data_augmentation( # add cfg instead of many args
+
+def data_augmentation(  # add cfg instead of many args
     crop_size: int = None,
     scale: tuple = None,
     mean=None,
@@ -231,26 +234,31 @@ def data_augmentation( # add cfg instead of many args
         Ready-to-use transform callable.
     """
     if is_training:
-        return transforms.Compose([
-            transforms.RandomResizedCrop(crop_size, scale=scale),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ])
+        return transforms.Compose(
+            [
+                transforms.RandomResizedCrop(crop_size, scale=scale),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std),
+            ]
+        )
     else:
-        return transforms.Compose([
-            transforms.Resize(crop_size),
-            transforms.CenterCrop(crop_size),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ])
+        return transforms.Compose(
+            [
+                transforms.Resize(crop_size),
+                transforms.CenterCrop(crop_size),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std),
+            ]
+        )
 
 
 # ==============================================================================
 # DataLoader factory
 # ==============================================================================
 
-def get_dataloader( # add cfg instead of many args
+
+def get_dataloader(  # add cfg instead of many args
     dataset: Dataset,
     batch_size: int,
     num_workers: int = 4,
@@ -288,6 +296,7 @@ def get_dataloader( # add cfg instead of many args
 # Patient-level train / val / test split
 # ==============================================================================
 
+
 def _undersample_to_minority(
     samples: list[tuple[Path, int]],
     rng: random.Random,
@@ -306,8 +315,9 @@ def _undersample_to_minority(
     list of (Path, int)
         All PMG samples plus a random equal-sized subset of HC samples.
     """
-    minority = [s for s in samples if s[1] == 1]
-    majority = [s for s in samples if s[1] == 0]
+    labels = [s[1] for s in samples]
+    minority = [s for s, l in zip(samples, labels) if l == 1]
+    majority = [s for s, l in zip(samples, labels) if l == 0]
     kept = rng.sample(majority, min(len(minority), len(majority)))
     return minority + kept
 
@@ -358,7 +368,7 @@ def split_dataset(
         raise ValueError(f"balance_mode must be one of {_valid}, got {balance_mode!r}")
 
     full = PMGDataset(data_dir=data_dir, pmg_negative_mode=pmg_negative_mode)
-    rng  = random.Random(seed)
+    rng = random.Random(seed)
 
     if balance_mode == "pre_split":
         full.samples = _undersample_to_minority(full.samples, rng)
@@ -374,11 +384,11 @@ def split_dataset(
 
     n = len(patients)
     n_test = max(1, round(n * test_frac))
-    n_val  = max(1, round(n * val_frac))
+    n_val = max(1, round(n * val_frac))
 
-    test_pids  = set(patients[:n_test])
-    val_pids   = set(patients[n_test:n_test + n_val])
-    train_pids = set(patients[n_test + n_val:])
+    test_pids = set(patients[:n_test])
+    val_pids = set(patients[n_test : n_test + n_val])
+    train_pids = set(patients[n_test + n_val :])
 
     def _collect(pids: set) -> list:
         return [full.samples[i] for pid in pids for i in patient_map[pid]]

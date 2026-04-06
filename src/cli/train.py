@@ -5,6 +5,7 @@ Usage:
     uv run train model.name=densenet201
     uv run train train.num_epochs=10 train.learning_rate=1e-3
 """
+
 import sys
 from pathlib import Path
 
@@ -17,7 +18,9 @@ sys.path.insert(0, str(project_root))
 from src.func.models.get_train import train
 
 
-@hydra.main(version_base=None, config_path=str(project_root / "hydra"), config_name="config")
+@hydra.main(
+    version_base=None, config_path=str(project_root / "hydra"), config_name="config"
+)
 def main(cfg: DictConfig) -> None:
     train(cfg)
 

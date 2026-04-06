@@ -9,11 +9,13 @@ Example:
     >>> gray.shape
     (64, 64)
 """
+
 import cv2
 import numpy as np
 # =============================================================================
 # Grayscale Conversion
 # =============================================================================
+
 
 def convert_to_grayscale(image: np.ndarray) -> np.ndarray:
     """Convert image to grayscale if needed.

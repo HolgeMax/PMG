@@ -1,9 +1,9 @@
 import os
 
-base_dir = '/home/lingfeng/Downloads/PMG1'
+base_dir = "/home/lingfeng/Downloads/PMG1"
 
 # ax_dir = os.path.join(base_dir, 'PMG1_axT1')
-ax_dir = os.path.join(base_dir, 'PMG1corT1')
+ax_dir = os.path.join(base_dir, "PMG1corT1")
 
 filename_list = []
 
@@ -14,7 +14,7 @@ for filename in os.listdir(ax_dir):
 
 filename_list.sort()
 
-filename_list_new = sorted(filename_list,key=len)
+filename_list_new = sorted(filename_list, key=len)
 
 # for filename in filename_list_new:
 #     print(filename)
@@ -29,8 +29,10 @@ size = (170, 170)
 image_array = []
 slice_num = 0
 for filename in filename_list_new:
-    image = Image.open(os.path.join(ax_dir, filename)).convert('L') # convert to gray scale
-    image = image.resize(size) 
+    image = Image.open(os.path.join(ax_dir, filename)).convert(
+        "L"
+    )  # convert to gray scale
+    image = image.resize(size)
     data = asarray(image)
     image_array.append(data)
     slice_num += 1

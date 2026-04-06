@@ -11,6 +11,7 @@ Example:
     >>> float(result.min()), float(result.max())
     (0.0, 1.0)
 """
+
 from typing import Tuple
 
 import numpy as np
@@ -18,6 +19,7 @@ import numpy as np
 # =============================================================================
 # Min-max normalization function
 # =============================================================================
+
 
 def normalize_min_max(
     image: np.ndarray,

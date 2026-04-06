@@ -1,11 +1,11 @@
-import torch
 import torch.nn as nn
 import torchvision.models as models
 from torchvision.models import ResNet101_Weights, DenseNet201_Weights
 
-#=============================================================================
+# =============================================================================
 # Custom head and model-building functions
-#=============================================================================
+# =============================================================================
+
 
 class PMGHead(nn.Module):
     """
@@ -23,12 +23,12 @@ class PMGHead(nn.Module):
             nn.Linear(in_features, 256),
             nn.ReLU(),
             nn.Dropout(p=dropout_p),
-            nn.Linear(256, 1),  
+            nn.Linear(256, 1),
         )
 
     def forward(self, x):
         fc = self.head(x)
-        return fc  # raw logit 
+        return fc  # raw logit
 
 
 def build_resnet101(dropout_p=0.5, freeze_backbone=False):
@@ -57,10 +57,12 @@ def build_resnet101(dropout_p=0.5, freeze_backbone=False):
 
     return model
 
+
 # ==============================================================================
 # Attach the head to DenseNet-201
 # ==============================================================================
-    
+
+
 def build_densenet201(dropout_p=0.5, freeze_backbone=False):
     """
     Load pretrained DenseNet-201 and replace its classification head.

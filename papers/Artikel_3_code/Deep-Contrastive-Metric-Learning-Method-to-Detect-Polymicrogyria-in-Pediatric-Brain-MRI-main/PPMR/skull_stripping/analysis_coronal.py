@@ -11,5 +11,6 @@ data = nib.load("coronal/brain.nii").get_fdata()
 print(data.shape)
 
 from matplotlib import pyplot as plt
-plt.imshow(data[100,:,:])
-plt.savefig('coronal_new_demo.png')
+
+plt.imshow(data[100, :, :])
+plt.savefig("coronal_new_demo.png")

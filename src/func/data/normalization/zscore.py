@@ -12,11 +12,13 @@ Example:
     >>> abs(float(result.mean())) < 0.01
     True
 """
+
 import numpy as np
 
 # =============================================================================
 # Z-score normalization function
 # =============================================================================
+
 
 def normalize_zscore(
     image: np.ndarray,

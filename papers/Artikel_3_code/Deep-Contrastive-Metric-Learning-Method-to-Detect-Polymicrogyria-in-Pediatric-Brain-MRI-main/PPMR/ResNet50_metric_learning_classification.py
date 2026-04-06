@@ -1,40 +1,28 @@
 import os
-import pandas as pd
-from PIL import Image, ImageOps
+from PIL import Image
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 import time
 
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img, img_to_array
-from tensorflow.keras.metrics import categorical_crossentropy
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import Conv2D, MaxPooling2D,GlobalAveragePooling2D, Concatenate, UpSampling2D, Reshape
-from tensorflow.keras.layers import Activation, Dropout, BatchNormalization, Flatten, Dense, LeakyReLU, Conv2DTranspose
-from tensorflow.keras.optimizers import Adam, SGD, RMSprop
-from tensorflow.keras import backend as K
-from tensorflow.keras import layers
+from tensorflow.keras.layers import GlobalAveragePooling2D
+from tensorflow.keras.layers import Dropout, BatchNormalization, Dense, LeakyReLU
 
 import sklearn
-from sklearn.model_selection import train_test_split
 
 from natsort import natsorted
 
-import cv2
-import shutil
-import glob
 
 import argparse
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--test')
-parser.add_argument('--val')
-parser.add_argument('--inner_fold')
+parser.add_argument("--test")
+parser.add_argument("--val")
+parser.add_argument("--inner_fold")
 args = parser.parse_args()
 
-image_shape = (256,256,3)
+image_shape = (256, 256, 3)
 
 margin = 5
 theta = 5
@@ -66,34 +54,36 @@ print("model complexity:", half_model.count_params())
 learning_rate = 1e-3
 optimizer = tf.keras.optimizers.Adam(learning_rate)
 
-checkpoint_dir = './inner_fold_' + str(args.inner_fold)
-checkpoint = tf.train.Checkpoint(optimizer=optimizer,
-                                 model=half_model)
+checkpoint_dir = "./inner_fold_" + str(args.inner_fold)
+checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=half_model)
 
 ckpt_manager = tf.train.CheckpointManager(checkpoint, checkpoint_dir, max_to_keep=1)
 
 # checkpoint.restore(ckpt_manager.latest_checkpoint)
 
-dataset_dir = '/home/lingfeng/Downloads/PMGstudycaseslabelled'
-dataset_dir_normal = '/home/lingfeng/Downloads/PMGControlsEditedDec2021'
+dataset_dir = "/home/lingfeng/Downloads/PMGstudycaseslabelled"
+dataset_dir_normal = "/home/lingfeng/Downloads/PMGControlsEditedDec2021"
 # dataset_dir_normal = '/home/lingfeng/Downloads/Controls_5'
 
+
 def test_usable_label(slice_):
-    label_num = slice_.split('.')[0].split('_')[-1]
+    label_num = slice_.split(".")[0].split("_")[-1]
     label_num = int(label_num)
-    if(label_num == 3):
+    if label_num == 3:
         return False
     else:
         return True
 
+
 def get_label(slices):
-    label_num = slices.split('.')[0].split('_')[-1]
+    label_num = slices.split(".")[0].split("_")[-1]
     label_num = int(label_num)
-    if(label_num == 1):
-        label = 'Yes'
+    if label_num == 1:
+        label = "Yes"
     else:
-        label = 'No'
+        label = "No"
     return label
+
 
 val_value = args.val
 val_value = val_value.split(" ")
@@ -105,14 +95,14 @@ test_value = test_value.split(" ")
 
 print("test_value:", test_value)
 
-def dataset_collection_func(): # or add some patients' normal slices
 
-    train_filepaths=[]
-    train_labels=[]
-    validation_filepaths=[]
-    validation_labels=[]
-    test_filepaths=[]
-    test_labels=[]
+def dataset_collection_func():  # or add some patients' normal slices
+    train_filepaths = []
+    train_labels = []
+    validation_filepaths = []
+    validation_labels = []
+    test_filepaths = []
+    test_labels = []
 
     num = 0
 
@@ -121,7 +111,7 @@ def dataset_collection_func(): # or add some patients' normal slices
         patient_path_saved = os.path.join(dataset_dir, patient_item)
 
         normal_abnormal = os.listdir(patient_path_saved)
-        if(normal_abnormal[0].__contains__("cor")):
+        if normal_abnormal[0].__contains__("cor"):
             coronal_path_saved = os.path.join(patient_path_saved, normal_abnormal[0])
             # control_path_saved = os.path.join(patient_path_saved, normal_abnormal[1])
 
@@ -132,21 +122,37 @@ def dataset_collection_func(): # or add some patients' normal slices
         coronal_path_list = os.listdir(coronal_path_saved)
 
         for slice_num in range(len(coronal_path_list)):
-            if(test_usable_label(coronal_path_list[slice_num])):
+            if test_usable_label(coronal_path_list[slice_num]):
                 pass
             else:
                 continue
-            
-            if(patient_item == str(val_value[0]) or patient_item == str(val_value[1]) or patient_item == str(val_value[2]) or patient_item == str(val_value[3])): # validation
-                validation_filepaths.append(os.path.join(coronal_path_saved, coronal_path_list[slice_num]))
+
+            if (
+                patient_item == str(val_value[0])
+                or patient_item == str(val_value[1])
+                or patient_item == str(val_value[2])
+                or patient_item == str(val_value[3])
+            ):  # validation
+                validation_filepaths.append(
+                    os.path.join(coronal_path_saved, coronal_path_list[slice_num])
+                )
                 validation_labels.append(get_label(coronal_path_list[slice_num]))
-            elif(patient_item == str(test_value[0]) or patient_item == str(test_value[1]) or patient_item == str(test_value[2]) or patient_item == str(test_value[3])):
-                test_filepaths.append(os.path.join(coronal_path_saved, coronal_path_list[slice_num]))
+            elif (
+                patient_item == str(test_value[0])
+                or patient_item == str(test_value[1])
+                or patient_item == str(test_value[2])
+                or patient_item == str(test_value[3])
+            ):
+                test_filepaths.append(
+                    os.path.join(coronal_path_saved, coronal_path_list[slice_num])
+                )
                 test_labels.append(get_label(coronal_path_list[slice_num]))
-            elif(patient_item != '33'):
-                train_filepaths.append(os.path.join(coronal_path_saved, coronal_path_list[slice_num]))
+            elif patient_item != "33":
+                train_filepaths.append(
+                    os.path.join(coronal_path_saved, coronal_path_list[slice_num])
+                )
                 train_labels.append(get_label(coronal_path_list[slice_num]))
-            
+
         num += 1
 
     num = 0
@@ -158,19 +164,36 @@ def dataset_collection_func(): # or add some patients' normal slices
         patient_sub_dir = os.listdir(patient_path_saved)
 
         for sub_dir in range(len(patient_sub_dir)):
-            control_path_saved = os.path.join(patient_path_saved, patient_sub_dir[sub_dir])
+            control_path_saved = os.path.join(
+                patient_path_saved, patient_sub_dir[sub_dir]
+            )
             control_path_list = os.listdir(control_path_saved)
             for slice_num in range(len(control_path_list)):
-
-                if(patient_item == str(val_value[0]) or patient_item == str(val_value[1]) or patient_item == str(val_value[2]) or patient_item == str(val_value[3])): # validation
-                    validation_filepaths.append(os.path.join(control_path_saved, control_path_list[slice_num]))
-                    validation_labels.append('No')
-                elif(patient_item == str(test_value[0]) or patient_item == str(test_value[1]) or patient_item == str(test_value[2]) or patient_item == str(test_value[3])):
-                    test_filepaths.append(os.path.join(control_path_saved, control_path_list[slice_num]))
-                    test_labels.append('No')
-                elif(patient_item != '33'):
-                    train_filepaths.append(os.path.join(control_path_saved, control_path_list[slice_num]))
-                    train_labels.append('No')
+                if (
+                    patient_item == str(val_value[0])
+                    or patient_item == str(val_value[1])
+                    or patient_item == str(val_value[2])
+                    or patient_item == str(val_value[3])
+                ):  # validation
+                    validation_filepaths.append(
+                        os.path.join(control_path_saved, control_path_list[slice_num])
+                    )
+                    validation_labels.append("No")
+                elif (
+                    patient_item == str(test_value[0])
+                    or patient_item == str(test_value[1])
+                    or patient_item == str(test_value[2])
+                    or patient_item == str(test_value[3])
+                ):
+                    test_filepaths.append(
+                        os.path.join(control_path_saved, control_path_list[slice_num])
+                    )
+                    test_labels.append("No")
+                elif patient_item != "33":
+                    train_filepaths.append(
+                        os.path.join(control_path_saved, control_path_list[slice_num])
+                    )
+                    train_labels.append("No")
 
         num += 1
 
@@ -182,26 +205,34 @@ def dataset_collection_func(): # or add some patients' normal slices
     test_labels = np.array(test_labels)
 
     # print(train_labels[:10])
-    train_labels = np.where(train_labels=='No', 0, 1)
+    train_labels = np.where(train_labels == "No", 0, 1)
     # print(train_labels[:10])
-    validation_labels = np.where(validation_labels=='No', 0, 1)
-    test_labels = np.where(test_labels=='No', 0, 1)
+    validation_labels = np.where(validation_labels == "No", 0, 1)
+    test_labels = np.where(test_labels == "No", 0, 1)
 
-    return train_filepaths, train_labels, validation_filepaths, validation_labels, test_filepaths, test_labels
+    return (
+        train_filepaths,
+        train_labels,
+        validation_filepaths,
+        validation_labels,
+        test_filepaths,
+        test_labels,
+    )
+
 
 def get_image(img_path):
     img_array = Image.open(img_path)
     img_array.load()
-    img_array = img_array.resize((image_shape[0],image_shape[1]))
+    img_array = img_array.resize((image_shape[0], image_shape[1]))
     img_array = np.asarray(img_array).astype(np.float32)
     # print("img_array.shape:", img_array.shape)
 
-    img_array = img_array / 255.
+    img_array = img_array / 255.0
 
     return img_array
 
-def compute_loss(labels, z):
 
+def compute_loss(labels, z):
     c_tf = tf.Variable(c, dtype=tf.float32, trainable=False)
 
     dist = tf.math.reduce_sum((z - c_tf) ** 2, axis=1)
@@ -218,14 +249,18 @@ def compute_loss(labels, z):
     normal_idx = tf.squeeze(normal_idx)
     abnormal_idx = tf.squeeze(abnormal_idx)
 
-    normal_labels = 1-tf.gather(labels, normal_idx)
+    normal_labels = 1 - tf.gather(labels, normal_idx)
     normal_labels = tf.cast(normal_labels, dtype=tf.float32)
-    normal_dist_loss = tf.math.reduce_mean(normal_labels * tf.gather(euclidean_norm, normal_idx))
+    normal_dist_loss = tf.math.reduce_mean(
+        normal_labels * tf.gather(euclidean_norm, normal_idx)
+    )
 
     # print("abnormal_idx:", abnormal_idx)
     # if(abnormal_idx == tf.Variable([], dtype=tf.int64, trainable=False)):
-    if(tf.size(abnormal_idx) == [0,]):
-    # if(abnormal_idx.eval() == []):
+    if tf.size(abnormal_idx) == [
+        0,
+    ]:
+        # if(abnormal_idx.eval() == []):
         # print("abnormal loss is 0")
         abnormal_dist_loss = 0
         abnormal_dist_loss_expansion = 0
@@ -233,17 +268,35 @@ def compute_loss(labels, z):
         abnormal_labels = tf.gather(labels, abnormal_idx)
         abnormal_labels = tf.cast(abnormal_labels, dtype=tf.float32)
 
-        abnormal_dist_loss = tf.math.reduce_mean(abnormal_labels * tf.math.maximum(tf.zeros_like(tf.gather(euclidean_norm, abnormal_idx)), margin - tf.gather(euclidean_norm, abnormal_idx)))
+        abnormal_dist_loss = tf.math.reduce_mean(
+            abnormal_labels
+            * tf.math.maximum(
+                tf.zeros_like(tf.gather(euclidean_norm, abnormal_idx)),
+                margin - tf.gather(euclidean_norm, abnormal_idx),
+            )
+        )
 
-        abnormal_dist_loss_expansion = tf.math.reduce_mean(abnormal_labels * (1. / (1. + tf.math.exp(tf.gather(euclidean_norm, abnormal_idx) - margin))))
+        abnormal_dist_loss_expansion = tf.math.reduce_mean(
+            abnormal_labels
+            * (
+                1.0
+                / (1.0 + tf.math.exp(tf.gather(euclidean_norm, abnormal_idx) - margin))
+            )
+        )
 
-    loss = normal_dist_loss + theta * (abnormal_dist_loss + abnormal_dist_loss_expansion)
+    loss = normal_dist_loss + theta * (
+        abnormal_dist_loss + abnormal_dist_loss_expansion
+    )
 
     print("euclidean_norm:", euclidean_norm)
     print("normal_dist_loss:", normal_dist_loss)
-    print("theta * (abnormal_dist_loss + abnormal_dist_loss_expansion):", theta * (abnormal_dist_loss + abnormal_dist_loss_expansion))
+    print(
+        "theta * (abnormal_dist_loss + abnormal_dist_loss_expansion):",
+        theta * (abnormal_dist_loss + abnormal_dist_loss_expansion),
+    )
 
     return loss
+
 
 def my_metrics(y_true, y_pred):
     y_true = np.squeeze(y_true)
@@ -253,25 +306,24 @@ def my_metrics(y_true, y_pred):
 
     TP, TN, FP, FN = 0, 0, 0, 0
     for prediction, y in zip(y_pred, y_true):
-
-        if(prediction == y):
-            if(prediction == 1): # {'No': 0, 'Yes': 1}
+        if prediction == y:
+            if prediction == 1:  # {'No': 0, 'Yes': 1}
                 TP += 1
             else:
                 TN += 1
         else:
-            if(prediction == 1):
+            if prediction == 1:
                 FP += 1
             else:
                 FN += 1
 
-    precision = TP/(TP+FP+1.0e-4)
+    precision = TP / (TP + FP + 1.0e-4)
 
-    recall = TP/(TP+FN+1.0e-4)
+    recall = TP / (TP + FN + 1.0e-4)
 
-    f_measure = (2. * precision * recall)/(precision + recall + 1.0e-4)
+    f_measure = (2.0 * precision * recall) / (precision + recall + 1.0e-4)
 
-    accuracy = (TP + TN) / (TP + TN + FP + FN+1.0e-4)
+    accuracy = (TP + TN) / (TP + TN + FP + FN + 1.0e-4)
 
     # print("TP:", TP)
     # print("TN:", TN)
@@ -284,6 +336,7 @@ def my_metrics(y_true, y_pred):
     # print("accuracy:", accuracy)
 
     return np.array([TP, TN, FP, FN, precision, recall, f_measure, accuracy])
+
 
 def train_step(inputs, labels, optimizer):
     # print("training......")
@@ -298,6 +351,7 @@ def train_step(inputs, labels, optimizer):
     optimizer.apply_gradients(zip(gradients, half_model.trainable_variables))
 
     return np.array(loss), optimizer
+
 
 def valid_step(inputs, labels):
     # print("validation......")
@@ -321,9 +375,16 @@ def valid_step(inputs, labels):
 
     return np.array(loss), metric_results, dist
 
-# add tensorboard
-def train(train_filepaths, train_labels, validation_filepaths, validation_labels, epochs, BATCH_SIZE):
 
+# add tensorboard
+def train(
+    train_filepaths,
+    train_labels,
+    validation_filepaths,
+    validation_labels,
+    epochs,
+    BATCH_SIZE,
+):
     global learning_rate
     global optimizer
 
@@ -345,38 +406,44 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
         train_filepaths, train_labels = train_filepaths[idx], train_labels[idx]
 
         print("train epoch = ", epoch)
-        for index in range(0, len(train_labels)-BATCH_SIZE, BATCH_SIZE):
-            label_batch = [] # always load the same batch
+        for index in range(0, len(train_labels) - BATCH_SIZE, BATCH_SIZE):
+            label_batch = []  # always load the same batch
             for i in range(BATCH_SIZE):
-                img_path = train_filepaths[index+i]
+                img_path = train_filepaths[index + i]
 
                 img_array = get_image(img_path)
 
                 # data augmentation
                 img_array = tf.keras.preprocessing.image.random_rotation(img_array, 0.2)
-                img_array = tf.keras.preprocessing.image.random_shift(img_array, 0.1, 0.1)
+                img_array = tf.keras.preprocessing.image.random_shift(
+                    img_array, 0.1, 0.1
+                )
                 img_array = tf.keras.preprocessing.image.random_shear(img_array, 0.1)
-                img_array = tf.keras.preprocessing.image.random_zoom(img_array, (0.7,1))
+                img_array = tf.keras.preprocessing.image.random_zoom(
+                    img_array, (0.7, 1)
+                )
 
                 img_array = np.array(img_array)
                 img_array = np.expand_dims(img_array, axis=0)
 
-                if(i == 0):
+                if i == 0:
                     image_batch = img_array
                 else:
                     image_batch = np.concatenate((image_batch, img_array), axis=0)
 
-                label_batch.append(train_labels[index+i])
+                label_batch.append(train_labels[index + i])
 
             label_batch = np.array(label_batch)
             label_batch = np.expand_dims(label_batch, axis=-1)
 
             loss, optimizer = train_step(image_batch, label_batch, optimizer)
 
-            if(iteration % 30 == 0):
-
+            if iteration % 30 == 0:
                 idx_val = np.random.permutation(len(validation_labels))
-                validation_filepaths, validation_labels = validation_filepaths[idx_val], validation_labels[idx_val]
+                validation_filepaths, validation_labels = (
+                    validation_filepaths[idx_val],
+                    validation_labels[idx_val],
+                )
 
                 val_loss_average = 0
                 val_tag = 0
@@ -390,26 +457,32 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
 
                 print("validation")
                 # validation
-                for val_index in range(0, len(validation_labels)-BATCH_SIZE, BATCH_SIZE):
-                    label_batch = [] # always load the same batch
+                for val_index in range(
+                    0, len(validation_labels) - BATCH_SIZE, BATCH_SIZE
+                ):
+                    label_batch = []  # always load the same batch
                     for i in range(BATCH_SIZE):
-                        img_path = validation_filepaths[val_index+i]
+                        img_path = validation_filepaths[val_index + i]
 
                         img_array = get_image(img_path)
 
                         img_array = np.expand_dims(img_array, axis=0)
 
-                        if(i == 0):
+                        if i == 0:
                             image_batch = img_array
                         else:
-                            image_batch = np.concatenate((image_batch, img_array), axis=0)
+                            image_batch = np.concatenate(
+                                (image_batch, img_array), axis=0
+                            )
 
-                        label_batch.append(validation_labels[val_index+i])
+                        label_batch.append(validation_labels[val_index + i])
 
                     label_batch = np.array(label_batch)
                     label_batch = np.expand_dims(label_batch, axis=-1)
 
-                    loss, metric_results, val_predictions = valid_step(image_batch, label_batch)
+                    loss, metric_results, val_predictions = valid_step(
+                        image_batch, label_batch
+                    )
 
                     val_tag += 1
                     val_loss_average += loss
@@ -434,7 +507,9 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
                 all_val_labels = all_val_labels.flatten()
                 all_val_predictions = all_val_predictions.flatten()
 
-                auc_roc_average = sklearn.metrics.roc_auc_score(all_val_labels, all_val_predictions)
+                auc_roc_average = sklearn.metrics.roc_auc_score(
+                    all_val_labels, all_val_predictions
+                )
                 # ValueError: Only one class present in y_true. ROC AUC score is not defined in that case.
 
                 print("val_loss_average:", val_loss_average)
@@ -442,10 +517,10 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
                 print("recall_average:", recall_average)
                 print("precision_average:", precision_average)
                 print("auc_roc_average:", auc_roc_average)
-                
+
                 # save the best only
                 # best val_auc_roc
-                if(first_tag == 1 or auc_roc_average > best_auc_roc):
+                if first_tag == 1 or auc_roc_average > best_auc_roc:
                     best_auc_roc = auc_roc_average
                     print("saveing model")
                     ckpt_manager.save()
@@ -453,9 +528,9 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
                     f = open("best_auc_roc_binary_classification.txt", "w")
                     f.write(str(best_auc_roc))
                     f.close()
-                
+
                 # best val_loss
-                if(first_tag == 1 or val_loss_average < best_val_loss):
+                if first_tag == 1 or val_loss_average < best_val_loss:
                     best_val_loss = val_loss_average
                     best_val_loss_epoch = val_iteration
                     best_val_loss_epoch_lr_decay = best_val_loss_epoch
@@ -465,8 +540,11 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
                 # learning rate decay --> reduce learning rate on plateau
                 plateau_patience = 30
 
-                if(val_loss_average > best_val_loss and (val_iteration - best_val_loss_epoch_lr_decay) == plateau_patience):
-
+                if (
+                    val_loss_average > best_val_loss
+                    and (val_iteration - best_val_loss_epoch_lr_decay)
+                    == plateau_patience
+                ):
                     checkpoint.restore(ckpt_manager.latest_checkpoint)
 
                     best_val_loss_epoch_lr_decay = val_iteration
@@ -477,7 +555,10 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
 
                 # early stopping
                 early_stopping_patience = 150
-                if(val_loss_average > best_val_loss and (val_iteration - best_val_loss_epoch) == early_stopping_patience):
+                if (
+                    val_loss_average > best_val_loss
+                    and (val_iteration - best_val_loss_epoch) == early_stopping_patience
+                ):
                     print("early stopping")
                     return
 
@@ -487,8 +568,8 @@ def train(train_filepaths, train_labels, validation_filepaths, validation_labels
 
             iteration += 1
 
-def evaluation(test_filepaths, test_labels, tag_name):
 
+def evaluation(test_filepaths, test_labels, tag_name):
     checkpoint.restore(ckpt_manager.latest_checkpoint)
 
     labels = []
@@ -505,20 +586,20 @@ def evaluation(test_filepaths, test_labels, tag_name):
         image_batch = img_array
 
         z = half_model(image_batch, training=False)
-        
+
         z = np.array(z)
 
         dist = np.sum((z - c) ** 2, axis=-1)
         dist = np.sqrt(dist)
 
-        if(dist[0] > margin):
+        if dist[0] > margin:
             prediction = 1
         else:
             prediction = 0
 
         dists.append(dist[0])
         predictions.append(prediction)
-        
+
         labels.append(test_labels[i])
 
     labels = np.array(labels)
@@ -540,24 +621,39 @@ def evaluation(test_filepaths, test_labels, tag_name):
     # print("auc_roc:", auc_roc)
 
     f = open("results.txt", "a")
-    f.write("\ninner_fold_"+str(args.inner_fold)+"\n")
+    f.write("\ninner_fold_" + str(args.inner_fold) + "\n")
     f.write(tag_name + "\n")
 
-    f.write("TP:"+str(metric_results[0])+"\n")
-    f.write("TN:"+str(metric_results[1])+"\n")
-    f.write("FP:"+str(metric_results[2])+"\n")
-    f.write("FN:"+str(metric_results[3])+"\n")
+    f.write("TP:" + str(metric_results[0]) + "\n")
+    f.write("TN:" + str(metric_results[1]) + "\n")
+    f.write("FP:" + str(metric_results[2]) + "\n")
+    f.write("FN:" + str(metric_results[3]) + "\n")
 
-    f.write("precision:"+str(metric_results[4])+"\n")
-    f.write("recall:"+str(metric_results[5])+"\n")
-    f.write("f_measure:"+str(metric_results[6])+"\n")
-    f.write("accuracy:"+str(metric_results[7])+"\n")
-    f.write("auc_roc:"+str(auc_roc)+"\n")
+    f.write("precision:" + str(metric_results[4]) + "\n")
+    f.write("recall:" + str(metric_results[5]) + "\n")
+    f.write("f_measure:" + str(metric_results[6]) + "\n")
+    f.write("accuracy:" + str(metric_results[7]) + "\n")
+    f.write("auc_roc:" + str(auc_roc) + "\n")
     f.close()
+
 
 epochs = 200
 BATCH_SIZE = 64
-train_filepaths, train_labels, validation_filepaths, validation_labels, test_filepaths, test_labels = dataset_collection_func()
-train(train_filepaths, train_labels, validation_filepaths, validation_labels, epochs, BATCH_SIZE)
+(
+    train_filepaths,
+    train_labels,
+    validation_filepaths,
+    validation_labels,
+    test_filepaths,
+    test_labels,
+) = dataset_collection_func()
+train(
+    train_filepaths,
+    train_labels,
+    validation_filepaths,
+    validation_labels,
+    epochs,
+    BATCH_SIZE,
+)
 evaluation(validation_filepaths, validation_labels, "validation")
 evaluation(test_filepaths, test_labels, "testing")

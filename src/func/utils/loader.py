@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import cv2
@@ -11,7 +10,7 @@ from src.func.evaluation.preprocessing_metrics import evaluate_preprocessing
 
 
 _NIFTI_SUFFIXES = {".nii", ".nii.gz"}
-_JPEG_SUFFIXES  = {".jpg", ".jpeg"}
+_JPEG_SUFFIXES = {".jpg", ".jpeg"}
 _SUPPORTED = {".jpg", ".jpeg", ".nii", ".nii.gz"}
 
 _PPMR_SOURCE_MAP: dict[str, str] = {
@@ -33,7 +32,8 @@ def collect_input_files(input_path: Path, recursive: bool = False) -> list[Path]
     if input_path.is_dir():
         iterator = input_path.rglob("*") if recursive else input_path.iterdir()
         files = sorted(
-            f for f in iterator
+            f
+            for f in iterator
             if f.is_file() and "".join(f.suffixes).lower() in _SUPPORTED
         )
         if not files:

@@ -1,5 +1,6 @@
 # filename: __init__.py
 """Configuration module for preprocessing parameters."""
+
 from src.config.preprocessing_config import (
     BilateralFilterConfig,
     CannyConfig,

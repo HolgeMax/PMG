@@ -9,12 +9,14 @@ Example:
     >>> result.shape == img.shape
     True
 """
+
 import cv2
 import numpy as np
 
 # =============================================================================
 # Bilateral Filter
 # =============================================================================
+
 
 def apply_bilateral_filter(
     image: np.ndarray,

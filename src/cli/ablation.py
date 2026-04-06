@@ -9,12 +9,22 @@ from omegaconf import DictConfig, OmegaConf
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.func.data.get_loader import PMGDataset, data_augmentation, get_dataloader, split_dataset
-from src.func.evaluation.ablation_study import make_black_box, run_all_ckpts_ablation_study
+from src.func.data.get_loader import (
+    PMGDataset,
+    data_augmentation,
+    get_dataloader,
+    split_dataset,
+)
+from src.func.evaluation.ablation_study import (
+    make_black_box,
+    run_all_ckpts_ablation_study,
+)
 
 
 def run_ablation(cfg: DictConfig) -> None:
-    device = "cuda" if cfg.ablation.device == "cuda" and torch.cuda.is_available() else "cpu"
+    device = (
+        "cuda" if cfg.ablation.device == "cuda" and torch.cuda.is_available() else "cpu"
+    )
 
     _train, _val, test_samples = split_dataset(
         cfg.data_loader.data_dir,

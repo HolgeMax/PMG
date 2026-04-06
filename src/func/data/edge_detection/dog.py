@@ -12,12 +12,14 @@ Example:
     >>> result.shape == img.shape
     True
 """
+
 import cv2
 import numpy as np
 
 # =============================================================================
 # DoG Edge Detection with Blending
 # =============================================================================
+
 
 def detect_edges_dog(
     image: np.ndarray,
@@ -69,9 +71,11 @@ def detect_edges_dog(
     )
     return blended
 
+
 # =============================================================================
 # Helper functions
 # =============================================================================
+
 
 def _sigma_to_ksize(sigma: float) -> int:
     """Convert sigma to appropriate kernel size (must be odd)."""

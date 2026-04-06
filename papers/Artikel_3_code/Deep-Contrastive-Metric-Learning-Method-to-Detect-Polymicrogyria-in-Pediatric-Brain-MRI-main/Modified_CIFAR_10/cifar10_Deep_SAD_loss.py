@@ -1,89 +1,76 @@
 import os
-import pandas as pd
-from PIL import Image, ImageOps
 import numpy as np
-from tqdm import tqdm
-import matplotlib.pyplot as plt
 import time
 
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img, img_to_array
-from tensorflow.keras.metrics import categorical_crossentropy
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Conv2D, MaxPooling2D,GlobalAveragePooling2D
-from tensorflow.keras.layers import Activation, Dropout, BatchNormalization, Flatten, Dense, LeakyReLU
-from tensorflow.keras.optimizers import Adam, SGD, RMSprop
-from tensorflow.keras import backend as K
-from tensorflow.keras import layers
 
 import sklearn
-from sklearn.model_selection import train_test_split
 
-from natsort import natsorted
 
-import cv2
-import shutil
-import glob
+base_dir = "."
 
-base_dir = '.'
 
-def dataset_collection_func(normal_class, abnormal_classes_list, abnormal_ratio, normal_amount):
-
+def dataset_collection_func(
+    normal_class, abnormal_classes_list, abnormal_ratio, normal_amount
+):
     abnormal_classes_array = np.array(abnormal_classes_list)
 
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
-    
-#     print(train_labels)
+    (train_images, train_labels), (test_images, test_labels) = (
+        tf.keras.datasets.cifar10.load_data()
+    )
+
+    #     print(train_labels)
     train_labels = np.squeeze(train_labels)
     test_labels = np.squeeze(test_labels)
 
     print("train_images.shape:", train_images.shape)
 
-#     print(train_images[0].shape)
+    #     print(train_images[0].shape)
 
-#     print(train_images[[1,2,3]].shape)
+    #     print(train_images[[1,2,3]].shape)
 
     print("train_labels.shape:", train_labels.shape)
-    
+
     one_class_idx = np.where(train_labels == normal_class)
-#     print("one_class_idx:", one_class_idx)
-    
+    #     print("one_class_idx:", one_class_idx)
+
     one_class_train_images = train_images[one_class_idx]
     one_class_train_labels = train_labels[one_class_idx]
-    one_class_train_labels[one_class_train_labels==normal_class] = 0
-    
+    one_class_train_labels[one_class_train_labels == normal_class] = 0
+
     one_class_train_images = one_class_train_images[:normal_amount]
     one_class_train_labels = one_class_train_labels[:normal_amount]
 
-#     print("1 one_class_train_images.shape:", one_class_train_images.shape)
+    #     print("1 one_class_train_images.shape:", one_class_train_images.shape)
 
     other_class_idx = np.where(train_labels != normal_class)
     other_class_train_images = train_images[other_class_idx]
     other_class_train_labels = train_labels[other_class_idx]
 
-#     print("2 other_class_train_images.shape:", other_class_train_images.shape)
+    #     print("2 other_class_train_images.shape:", other_class_train_images.shape)
 
-    other_class_train_should_idx = np.where((other_class_train_labels == abnormal_classes_array[0])
-                                            | (other_class_train_labels == abnormal_classes_array[1])
-                                            | (other_class_train_labels == abnormal_classes_array[2])
-                                            | (other_class_train_labels == abnormal_classes_array[3])
-                                            | (other_class_train_labels == abnormal_classes_array[4]))
+    other_class_train_should_idx = np.where(
+        (other_class_train_labels == abnormal_classes_array[0])
+        | (other_class_train_labels == abnormal_classes_array[1])
+        | (other_class_train_labels == abnormal_classes_array[2])
+        | (other_class_train_labels == abnormal_classes_array[3])
+        | (other_class_train_labels == abnormal_classes_array[4])
+    )
     other_class_train_images = other_class_train_images[other_class_train_should_idx]
     other_class_train_labels = other_class_train_labels[other_class_train_should_idx]
 
-#     print("3 other_class_train_images.shape:", other_class_train_images.shape)
+    #     print("3 other_class_train_images.shape:", other_class_train_images.shape)
 
-    np.random.seed(1234) # set seed
+    np.random.seed(1234)  # set seed
     idx = np.random.permutation(len(other_class_train_labels))
     other_class_train_images = other_class_train_images[[idx]]
     other_class_train_labels = other_class_train_labels[[idx]]
 
-#     print("4 other_class_train_images.shape:", other_class_train_images.shape)
+    #     print("4 other_class_train_images.shape:", other_class_train_images.shape)
 
-#     print("other_class_train_labels:", other_class_train_labels)
+    #     print("other_class_train_labels:", other_class_train_labels)
 
-    other_class_train_labels[other_class_train_labels !=normal_class] = 1
+    other_class_train_labels[other_class_train_labels != normal_class] = 1
 
     train_one_class_len = len(one_class_train_labels)
 
@@ -92,56 +79,102 @@ def dataset_collection_func(normal_class, abnormal_classes_list, abnormal_ratio,
     other_class_train_images = other_class_train_images[:train_other_class_should_len]
     other_class_train_labels = other_class_train_labels[:train_other_class_should_len]
 
-#     print("5 other_class_train_images.shape:", other_class_train_images.shape)
+    #     print("5 other_class_train_images.shape:", other_class_train_images.shape)
 
     print("majority train number:", len(one_class_train_labels))
     print("minority train number:", len(other_class_train_labels))
     # print("other_class_train_labels:", other_class_train_labels)
 
     # train:validation = 8:2
-    one_class_train_validation_threshold = int(len(one_class_train_labels)*0.8)
-    other_class_train_validation_threshold = int(len(other_class_train_labels)*0.8)
+    one_class_train_validation_threshold = int(len(one_class_train_labels) * 0.8)
+    other_class_train_validation_threshold = int(len(other_class_train_labels) * 0.8)
 
-    one_class_train_images_train = one_class_train_images[:one_class_train_validation_threshold]
-    one_class_train_images_validation = one_class_train_images[one_class_train_validation_threshold:]
+    one_class_train_images_train = one_class_train_images[
+        :one_class_train_validation_threshold
+    ]
+    one_class_train_images_validation = one_class_train_images[
+        one_class_train_validation_threshold:
+    ]
 
-    one_class_train_labels_train = one_class_train_labels[:one_class_train_validation_threshold]
-    one_class_train_labels_validation = one_class_train_labels[one_class_train_validation_threshold:]
+    one_class_train_labels_train = one_class_train_labels[
+        :one_class_train_validation_threshold
+    ]
+    one_class_train_labels_validation = one_class_train_labels[
+        one_class_train_validation_threshold:
+    ]
 
-    other_class_train_images_train = other_class_train_images[:other_class_train_validation_threshold]
-    other_class_train_images_validation = other_class_train_images[other_class_train_validation_threshold:]
+    other_class_train_images_train = other_class_train_images[
+        :other_class_train_validation_threshold
+    ]
+    other_class_train_images_validation = other_class_train_images[
+        other_class_train_validation_threshold:
+    ]
 
-    other_class_train_labels_train = other_class_train_labels[:other_class_train_validation_threshold]
-    other_class_train_labels_validation = other_class_train_labels[other_class_train_validation_threshold:]
+    other_class_train_labels_train = other_class_train_labels[
+        :other_class_train_validation_threshold
+    ]
+    other_class_train_labels_validation = other_class_train_labels[
+        other_class_train_validation_threshold:
+    ]
 
-    train_images = np.concatenate((one_class_train_images_train,other_class_train_images_train),axis=0)
-    train_labels = np.concatenate((one_class_train_labels_train,other_class_train_labels_train),axis=0)
-    
-    print("one_class_train_labels_train:",len(one_class_train_labels_train))
-    print("other_class_train_labels_train:",len(other_class_train_labels_train))
+    train_images = np.concatenate(
+        (one_class_train_images_train, other_class_train_images_train), axis=0
+    )
+    train_labels = np.concatenate(
+        (one_class_train_labels_train, other_class_train_labels_train), axis=0
+    )
 
-    validation_images = np.concatenate((one_class_train_images_validation,other_class_train_images_validation),axis=0)
-    validation_labels = np.concatenate((one_class_train_labels_validation,other_class_train_labels_validation),axis=0)
-    
-    print("one_class_train_labels_validation:",len(one_class_train_labels_validation))
-    print("other_class_train_labels_validation:",len(other_class_train_labels_validation))
-    
+    print("one_class_train_labels_train:", len(one_class_train_labels_train))
+    print("other_class_train_labels_train:", len(other_class_train_labels_train))
+
+    validation_images = np.concatenate(
+        (one_class_train_images_validation, other_class_train_images_validation), axis=0
+    )
+    validation_labels = np.concatenate(
+        (one_class_train_labels_validation, other_class_train_labels_validation), axis=0
+    )
+
+    print("one_class_train_labels_validation:", len(one_class_train_labels_validation))
+    print(
+        "other_class_train_labels_validation:", len(other_class_train_labels_validation)
+    )
+
     # test
-    
-    test_labels[test_labels!=normal_class] = 11
-    test_labels[test_labels==normal_class] = 0
-    test_labels[test_labels==11] = 1
-    
+
+    test_labels[test_labels != normal_class] = 11
+    test_labels[test_labels == normal_class] = 0
+    test_labels[test_labels == 11] = 1
+
     print("train_images.shape:", train_images.shape)
 
-    return train_images, train_labels, validation_images, validation_labels, test_images, test_labels
+    return (
+        train_images,
+        train_labels,
+        validation_images,
+        validation_labels,
+        test_images,
+        test_labels,
+    )
 
-train_images, train_labels, validation_images, validation_labels, test_images, test_labels = dataset_collection_func(normal_class = 0, abnormal_classes_list = [1,2,3,4,5], abnormal_ratio = 0.1, normal_amount=5000)
 
-normal_idx = np.where(train_labels==0)[0]
+(
+    train_images,
+    train_labels,
+    validation_images,
+    validation_labels,
+    test_images,
+    test_labels,
+) = dataset_collection_func(
+    normal_class=0,
+    abnormal_classes_list=[1, 2, 3, 4, 5],
+    abnormal_ratio=0.1,
+    normal_amount=5000,
+)
+
+normal_idx = np.where(train_labels == 0)[0]
 train_images_normal = train_images[normal_idx]
 
-image_shape = (32,32,3)
+image_shape = (32, 32, 3)
 
 img_dim = image_shape[0]
 
@@ -151,25 +184,24 @@ half_model = tf.keras.Sequential(
     [
         tf.keras.layers.InputLayer(input_shape=(32, 32, 3)),
         tf.keras.layers.Conv2D(
-            filters=32, kernel_size=5, strides=(1, 1), padding='same'),
+            filters=32, kernel_size=5, strides=(1, 1), padding="same"
+        ),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.LeakyReLU(alpha=0.01),
         tf.keras.layers.MaxPool2D(),
-
         tf.keras.layers.Conv2D(
-            filters=64, kernel_size=5, strides=(1, 1), padding='same'),
+            filters=64, kernel_size=5, strides=(1, 1), padding="same"
+        ),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.LeakyReLU(alpha=0.01),
         tf.keras.layers.MaxPool2D(),
-
         tf.keras.layers.Conv2D(
-            filters=128, kernel_size=5, strides=(1, 1), padding='same'),
+            filters=128, kernel_size=5, strides=(1, 1), padding="same"
+        ),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.LeakyReLU(alpha=0.01),
         tf.keras.layers.MaxPool2D(),
-
         tf.keras.layers.Flatten(),
-
         # No activation
         tf.keras.layers.Dense(latent_dim),
     ]
@@ -180,14 +212,13 @@ c = np.ones(latent_dim)
 learning_rate = 1e-3
 optimizer = tf.keras.optimizers.Adam(learning_rate)
 
-checkpoint_dir = os.path.join(base_dir, 'Deep_SAD_loss_classification')
-checkpoint = tf.train.Checkpoint(optimizer=optimizer,
-                                 model=half_model)
+checkpoint_dir = os.path.join(base_dir, "Deep_SAD_loss_classification")
+checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=half_model)
 
 ckpt_manager = tf.train.CheckpointManager(checkpoint, checkpoint_dir, max_to_keep=1)
 
-def compute_loss(labels, z, eps=1e-4):
 
+def compute_loss(labels, z, eps=1e-4):
     c_tf = tf.Variable(c, dtype=tf.float32, trainable=False)
 
     dist = tf.math.reduce_sum((z - c_tf) ** 2, axis=1)
@@ -210,14 +241,15 @@ def compute_loss(labels, z, eps=1e-4):
 
     abnormal_labels = labels
     abnormal_labels = tf.cast(abnormal_labels, dtype=tf.float32)
-    
-    abnormal_dist_loss = abnormal_labels * (1. / (dist + eps))
+
+    abnormal_dist_loss = abnormal_labels * (1.0 / (dist + eps))
 
     loss = tf.math.reduce_mean(normal_dist_loss + abnormal_dist_loss)
 
     print("loss:", loss)
 
     return loss
+
 
 def my_metrics(y_true, y_pred):
     y_true = np.squeeze(y_true)
@@ -227,25 +259,24 @@ def my_metrics(y_true, y_pred):
 
     TP, TN, FP, FN = 0, 0, 0, 0
     for prediction, y in zip(y_pred, y_true):
-
-        if(prediction == y):
-            if(prediction == 1): # {'No': 0, 'Yes': 1}
+        if prediction == y:
+            if prediction == 1:  # {'No': 0, 'Yes': 1}
                 TP += 1
             else:
                 TN += 1
         else:
-            if(prediction == 1):
+            if prediction == 1:
                 FP += 1
             else:
                 FN += 1
 
-    precision = TP/(TP+FP+1.0e-4)
+    precision = TP / (TP + FP + 1.0e-4)
 
-    recall = TP/(TP+FN+1.0e-4)
+    recall = TP / (TP + FN + 1.0e-4)
 
-    f_measure = (2. * precision * recall)/(precision + recall + 1.0e-4)
+    f_measure = (2.0 * precision * recall) / (precision + recall + 1.0e-4)
 
-    accuracy = (TP + TN) / (TP + TN + FP + FN+1.0e-4)
+    accuracy = (TP + TN) / (TP + TN + FP + FN + 1.0e-4)
 
     # print("TP:", TP)
     # print("TN:", TN)
@@ -258,6 +289,7 @@ def my_metrics(y_true, y_pred):
     # print("accuracy:", accuracy)
 
     return np.array([TP, TN, FP, FN, precision, recall, f_measure, accuracy])
+
 
 def train_step(inputs, labels, optimizer):
     # print("training......")
@@ -272,6 +304,7 @@ def train_step(inputs, labels, optimizer):
     optimizer.apply_gradients(zip(gradients, half_model.trainable_variables))
 
     return np.array(loss), optimizer
+
 
 def valid_step(inputs, labels, R):
     # print("validation......")
@@ -295,20 +328,21 @@ def valid_step(inputs, labels, R):
 
     return np.array(loss), metric_results, predictions
 
+
 def get_R(dist, nu):
     return np.quantile(dist, 1 - nu)
 
-def get_R_based_on_c(train_images, train_labels, nu, eps = 1e-4):
 
+def get_R_based_on_c(train_images, train_labels, nu, eps=1e-4):
     latent_features_list = []
 
     for index in range(len(train_images)):
-        if(train_labels[index] == 0):
+        if train_labels[index] == 0:
             image = train_images[index]
             image = np.expand_dims(image, axis=0)
 
             image = image.astype(np.float32)
-            image = image / 255.
+            image = image / 255.0
 
             latent_features = half_model(image, training=False)
             latent_features = np.array(latent_features)
@@ -327,8 +361,16 @@ def get_R_based_on_c(train_images, train_labels, nu, eps = 1e-4):
 
     return R
 
-def train(train_images, train_labels, validation_images, validation_labels, epochs, BATCH_SIZE, nu):
 
+def train(
+    train_images,
+    train_labels,
+    validation_images,
+    validation_labels,
+    epochs,
+    BATCH_SIZE,
+    nu,
+):
     global learning_rate
     global optimizer
 
@@ -350,39 +392,44 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
         train_images, train_labels = train_images[[idx]], train_labels[[idx]]
 
         print("train epoch = ", epoch)
-        for index in range(0, len(train_labels)-BATCH_SIZE, BATCH_SIZE):
-            label_batch = [] # always load the same batch
+        for index in range(0, len(train_labels) - BATCH_SIZE, BATCH_SIZE):
+            label_batch = []  # always load the same batch
             for i in range(BATCH_SIZE):
+                img_array = train_images[index + i]
 
-                img_array = train_images[index+i]
-
-                img_array = img_array / 255.
+                img_array = img_array / 255.0
 
                 # data augmentation
                 img_array = tf.keras.preprocessing.image.random_rotation(img_array, 0.2)
-                img_array = tf.keras.preprocessing.image.random_shift(img_array, 0.1, 0.1)
+                img_array = tf.keras.preprocessing.image.random_shift(
+                    img_array, 0.1, 0.1
+                )
                 img_array = tf.keras.preprocessing.image.random_shear(img_array, 0.1)
-                img_array = tf.keras.preprocessing.image.random_zoom(img_array, (0.7,1))
+                img_array = tf.keras.preprocessing.image.random_zoom(
+                    img_array, (0.7, 1)
+                )
 
                 img_array = np.array(img_array)
                 img_array = np.expand_dims(img_array, axis=0)
 
-                if(i == 0):
+                if i == 0:
                     image_batch = img_array
                 else:
                     image_batch = np.concatenate((image_batch, img_array), axis=0)
 
-                label_batch.append(train_labels[index+i])
+                label_batch.append(train_labels[index + i])
 
             label_batch = np.array(label_batch)
             label_batch = np.expand_dims(label_batch, axis=-1)
 
             loss, optimizer = train_step(image_batch, label_batch, optimizer)
 
-            if(iteration % 30 == 0):
-
+            if iteration % 30 == 0:
                 idx_val = np.random.permutation(len(validation_labels))
-                validation_images, validation_labels = validation_images[[idx_val]], validation_labels[[idx_val]]
+                validation_images, validation_labels = (
+                    validation_images[[idx_val]],
+                    validation_labels[[idx_val]],
+                )
 
                 val_loss_average = 0
                 val_tag = 0
@@ -399,21 +446,25 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
 
                 R = get_R_based_on_c(train_images, train_labels, nu)
 
-                for val_index in range(0, len(validation_labels)-BATCH_SIZE, BATCH_SIZE):
-                    label_batch = [] # always load the same batch
+                for val_index in range(
+                    0, len(validation_labels) - BATCH_SIZE, BATCH_SIZE
+                ):
+                    label_batch = []  # always load the same batch
                     for i in range(BATCH_SIZE):
-                        img_array = validation_images[val_index+i]
+                        img_array = validation_images[val_index + i]
 
-                        img_array = img_array / 255.
+                        img_array = img_array / 255.0
 
                         img_array = np.expand_dims(img_array, axis=0)
 
-                        if(i == 0):
+                        if i == 0:
                             image_batch = img_array
                         else:
-                            image_batch = np.concatenate((image_batch, img_array), axis=0)
+                            image_batch = np.concatenate(
+                                (image_batch, img_array), axis=0
+                            )
 
-                        label_batch.append(validation_labels[val_index+i])
+                        label_batch.append(validation_labels[val_index + i])
 
                     label_batch = np.array(label_batch)
                     label_batch = np.expand_dims(label_batch, axis=-1)
@@ -421,7 +472,9 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
                     print("image_batch.shape:", image_batch.shape)
                     print("label_batch.shape:", label_batch.shape)
 
-                    loss, metric_results, val_predictions = valid_step(image_batch, label_batch, R)
+                    loss, metric_results, val_predictions = valid_step(
+                        image_batch, label_batch, R
+                    )
 
                     val_tag += 1
                     val_loss_average += loss
@@ -446,7 +499,9 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
                 all_val_labels = all_val_labels.flatten()
                 all_val_predictions = all_val_predictions.flatten()
 
-                auc_roc_average = sklearn.metrics.roc_auc_score(all_val_labels, all_val_predictions)
+                auc_roc_average = sklearn.metrics.roc_auc_score(
+                    all_val_labels, all_val_predictions
+                )
                 # ValueError: Only one class present in y_true. ROC AUC score is not defined in that case.
 
                 print("val_loss_average:", val_loss_average)
@@ -454,20 +509,25 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
                 print("recall_average:", recall_average)
                 print("precision_average:", precision_average)
                 print("auc_roc_average:", auc_roc_average)
-                
+
                 # save the best only
                 # best val_auc_roc
-                if(first_tag == 1 or auc_roc_average > best_auc_roc):
+                if first_tag == 1 or auc_roc_average > best_auc_roc:
                     best_auc_roc = auc_roc_average
                     print("saveing model")
                     ckpt_manager.save()
 
-                    f = open(os.path.join(base_dir,"best_auc_roc_binary_classification.txt"), "w")
+                    f = open(
+                        os.path.join(
+                            base_dir, "best_auc_roc_binary_classification.txt"
+                        ),
+                        "w",
+                    )
                     f.write(str(best_auc_roc))
                     f.close()
-                
+
                 # best val_loss
-                if(first_tag == 1 or val_loss_average < best_val_loss):
+                if first_tag == 1 or val_loss_average < best_val_loss:
                     best_val_loss = val_loss_average
                     best_val_loss_epoch = val_iteration
                     best_val_loss_epoch_lr_decay = best_val_loss_epoch
@@ -477,8 +537,11 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
                 # learning rate decay --> reduce learning rate on plateau
                 plateau_patience = 30
 
-                if(val_loss_average > best_val_loss and (val_iteration - best_val_loss_epoch_lr_decay) == plateau_patience):
-
+                if (
+                    val_loss_average > best_val_loss
+                    and (val_iteration - best_val_loss_epoch_lr_decay)
+                    == plateau_patience
+                ):
                     checkpoint.restore(ckpt_manager.latest_checkpoint)
 
                     best_val_loss_epoch_lr_decay = val_iteration
@@ -489,7 +552,10 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
 
                 # early stopping
                 early_stopping_patience = 150
-                if(val_loss_average > best_val_loss and (val_iteration - best_val_loss_epoch) == early_stopping_patience):
+                if (
+                    val_loss_average > best_val_loss
+                    and (val_iteration - best_val_loss_epoch) == early_stopping_patience
+                ):
                     print("early stopping")
                     return
 
@@ -498,6 +564,7 @@ def train(train_images, train_labels, validation_images, validation_labels, epoc
                 val_iteration += 1
 
             iteration += 1
+
 
 def evaluation(test_images, test_labels, nu):
     print("testing")
@@ -513,27 +580,27 @@ def evaluation(test_images, test_labels, nu):
     for i in range(len(test_labels)):
         img_array = test_images[i]
 
-        img_array = img_array / 255.
+        img_array = img_array / 255.0
 
         img_array = np.expand_dims(img_array, axis=0)
 
         image_batch = img_array
 
         z = half_model(image_batch, training=False)
-        
+
         z = np.array(z)
 
         dist = np.sum((z - c) ** 2, axis=-1)
         dist = np.sqrt(dist)
 
-        if(dist[0] > R):
+        if dist[0] > R:
             prediction = 1
         else:
             prediction = 0
 
         dists.append(dist[0])
         predictions.append(prediction)
-        
+
         labels.append(test_labels[i])
 
     labels = np.array(labels)
@@ -554,9 +621,18 @@ def evaluation(test_images, test_labels, nu):
     print("accuracy:", metric_results[7])
     print("auc_roc:", auc_roc)
 
+
 epochs = 400
 BATCH_SIZE = 128
-nu = 0.05 # it should be a fine-tuned hyper-parameter
-train(train_images, train_labels, validation_images, validation_labels, epochs, BATCH_SIZE, nu)
+nu = 0.05  # it should be a fine-tuned hyper-parameter
+train(
+    train_images,
+    train_labels,
+    validation_images,
+    validation_labels,
+    epochs,
+    BATCH_SIZE,
+    nu,
+)
 evaluation(validation_images, validation_labels, nu)
 evaluation(test_images, test_labels, nu)

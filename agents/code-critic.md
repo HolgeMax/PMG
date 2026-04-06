@@ -30,6 +30,11 @@ Checklist:
    - Mandatory **docstrings** (Google-style: Args, Returns, Raises)
    - Max **line width**: 88 characters
    - No unused imports, dead code, or implicit behavior
+   - **Prefer matrix/tensor operations over Python loops** — reject any loop
+     that iterates element-wise over arrays, tensors, or label lists when a
+     vectorised equivalent exists (e.g. `torch.bincount`, `np.bincount`,
+     boolean masking, `scatter_add`).  Flag the offending loop and suggest
+     the specific vectorised replacement.
 
    When rejecting, suggest **specific refactors** (function splits, renames, API changes).
 
