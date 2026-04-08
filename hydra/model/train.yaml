@@ -13,3 +13,4 @@ is_training: true
 val_frac: 0.2
 test_frac: 0.2
 seed: 42
+output_dir: results   # base output directory for checkpoints and metrics

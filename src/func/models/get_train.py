@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 from pathlib import Path
 
+from hydra.utils import get_original_cwd
+
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 from torch.optim import Adam
@@ -192,12 +194,15 @@ def train_one_fold(
         subdir = f"{model_prefix}_{split_mode}"
         run_tag = f"{cfg.model.name}_{data_tag}_{split_mode}{balance_suffix}"
 
-    ckpt_dir = Path("results/checkpoints") / subdir
+    _raw = cfg.train.get("output_dir", "results")
+    output_root = Path(_raw) if Path(_raw).is_absolute() else Path(get_original_cwd()) / _raw
+
+    ckpt_dir = output_root / "checkpoints" / subdir
     ckpt_dir.mkdir(parents=True, exist_ok=True)
     best_ckpt = ckpt_dir / f"{run_tag}_best.pt"
     final_ckpt = ckpt_dir / f"{run_tag}_final.pt"
 
-    metrics_dir = Path("results/metrics") / subdir
+    metrics_dir = Path(get_original_cwd()) / "results" / "metrics" / subdir
     metrics_dir.mkdir(parents=True, exist_ok=True)
     csv_path = metrics_dir / f"{run_tag}_metrics.csv"
 

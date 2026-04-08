@@ -1,3 +1,46 @@
+### Session 16 - 08.04.26
+
+#### Configurable Output Directory, Hydra CWD Fix & Notebook Plot Saving
+
+**Problem diagnosed — disk-full error on server:**
+- `RuntimeError: basic_ios::clear: iostream error` was raised when PyTorch tried to save `.pt` checkpoint files.
+- Root cause: disk quota exceeded on the server. The fix was to redirect checkpoint output to a scratch directory (`/indirect/proc_tmp/holgerlyng`) via a new `output_dir` config option.
+
+**Configurable `output_dir` for checkpoints (`hydra/model/train.yaml`, `src/func/models/get_train.py`):**
+- Added `output_dir: results` to `hydra/model/train.yaml` as the default base directory for checkpoints.
+- In `get_train.py`, `train_one_fold()` now reads `cfg.train.output_dir` and resolves it with `get_original_cwd()` from `hydra.utils` so that relative paths anchor to the project root rather than Hydra's run-specific CWD.
+- Absolute paths (e.g. `/indirect/proc_tmp/holgerlyng`) are passed through untouched.
+- Checkpoints land in `<output_dir>/checkpoints/<subdir>/`; metrics always go to `<project_root>/results/metrics/<subdir>/` regardless of `output_dir`.
+- Override at launch: `uv run train train.output_dir=/indirect/proc_tmp/holgerlyng`
+
+**Hydra CWD path fix for metrics (`src/func/models/get_train.py`):**
+- `metrics_dir` was previously constructed from a hardcoded relative path that broke when Hydra changed the working directory.
+- Fixed by anchoring with `Path(get_original_cwd()) / "results" / "metrics" / subdir`, consistent with the new checkpoint path logic.
+
+**Notebook — plot saving (`notebooks/Metrics_exploration.ipynb`):**
+- Added new cell `plot_dirs_setup` that creates two output directories at notebook load time: `results/plots/metrics/loss_curves/` and `results/plots/metrics/metric_curves/`.
+- Training curves (per run) are now saved as PNG files to `loss_curves/`.
+- All summary bar charts (test metrics, cross-validation summary, ablation results, F1 drop chart) are saved to `metric_curves/`.
+
+**Notebook — run ordering (`notebooks/Metrics_exploration.ipynb`):**
+- Added helper `_run_sort_key()` in the `load_metrics` cell.
+- Ensures all plots and tables display runs in a consistent order: ResNet raw-paper, ResNet raw-correct, ResNet preprocessed-paper, ResNet preprocessed-correct, ResNet downsampled; then DenseNet in the same pattern.
+
+#### Key Files Modified
+- `hydra/model/train.yaml` — added `output_dir: results` config key
+- `src/func/models/get_train.py` — `train_one_fold()`: configurable `output_dir` for checkpoints via `get_original_cwd()` anchor; fixed `metrics_dir` to also use `get_original_cwd()` anchor
+- `notebooks/Metrics_exploration.ipynb` — added `plot_dirs_setup` cell for plot output directories; added plot-saving calls to all chart cells; added `_run_sort_key()` for consistent run ordering across plots and tables
+- `.gitignore` — added `report.md` to ignore list
+
+#### Open Items (carried forward)
+- Fix `10cor_1_19__1.jpg` double-underscore filename so the slice is correctly parsed and included in both datasets
+- Investigate and restore `2control2cor_0_019_preprocessed_minimal.jpg` in `PPMR_minimal/controlcases`
+- Run end-to-end training with the deterministic-split fix applied and verify split assignments match between raw and preprocessed loaders
+- Validate FOV confound via naive CNN baseline experiment
+- Implement skull-stripping or brain bounding-box crop as first preprocessing step
+
+---
+
 ### Session 15 - 04.04.26
 
 #### Test Metrics Bar Chart: Converted from Vertical to Horizontal Layout
