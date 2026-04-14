@@ -236,7 +236,7 @@ def data_augmentation(  # add cfg instead of many args
     if is_training:
         return transforms.Compose(
             [
-                transforms.RandomResizedCrop(crop_size, scale=scale),
+                transforms.RandomResizedCrop(crop_size, scale=scale), # crop by 80-100% of the area, then resize to crop_size to 224x224
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std),

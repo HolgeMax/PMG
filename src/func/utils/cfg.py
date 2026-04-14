@@ -52,6 +52,8 @@ def config_to_preprocessing_config(cfg: DictConfig) -> PreprocessingConfig:
         if canny_cfg is not None
         else CannyConfig(),
         convert_to_grayscale=pre.get("convert_to_grayscale", True),
+        save=pre.get("save", False),
+        save_dir=pre.get("save_dir", "results/preprocessing_debug"),
     )
 
 
@@ -68,4 +70,6 @@ def _config_to_dict(config: PreprocessingConfig) -> dict:
         "bilateral": asdict(config.bilateral) if config.bilateral is not None else None,
         "canny": asdict(config.canny),
         "convert_to_grayscale": config.convert_to_grayscale,
+        "save": config.save,
+        "save_dir": config.save_dir,
     }

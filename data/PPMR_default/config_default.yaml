@@ -1,26 +1,30 @@
 preprocessing:
   convert_to_grayscale: true
+  save: true
+  save_dir: results/pipeline_debug
   normalization:
     method: min_max
     output_range:
     - 0.0
     - 1.0
   clahe:
-    clip_limit: 1.5
+    clip_limit: 2.0
     tile_grid_size:
     - 8
     - 8
   bilateral:
-    diameter: 2
-    sigma_color: 25.0
-    sigma_space: 25.0
+    diameter: 9
+    sigma_color: 75.0
+    sigma_space: 75.0
   canny:
     low_threshold: 50
     high_threshold: 200
     aperture_size: 3
-    blend_alpha: 0.05
+    blend_alpha: 0.2
 data_loader:
   data_dir: data/PPMR_default
+  raw_data_dir: data/PPMR
+  train_raw: false
   crop_size: 224
   scale:
   - 0.8
@@ -34,6 +38,8 @@ data_loader:
   - 0.224
   - 0.225
   pmg_negative_mode: correct
+  augment: true
+  balance_mode: null
 model:
   name: resnet101
   pretrained: true
@@ -42,15 +48,16 @@ model:
 train:
   batch_size: 32
   num_epochs: 20
-  learning_rate: 0.0001
-  weight_decay: 1.0e-05
+  learning_rate: 0.0005
+  weight_decay: 0.001
   num_workers: 4
   device: cuda
   is_training: true
-  val_frac: 0.15
-  test_frac: 0.15
+  val_frac: 0.2
+  test_frac: 0.2
   seed: 42
-input_path: data/PPMR/PMGstudycaseslabelled/2/2cor_1/2cor_1_19_2.jpg
+  output_dir: results
+input_path: data/PPMR/PMGstudycaseslabelled/34/34cor_1/34cor_1_68_1.jpg
 output_path: data/PPMR_${hydra:runtime.choices.preprocessing}
 slice_idx: null
 recursive: false

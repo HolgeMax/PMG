@@ -33,6 +33,27 @@ uv run preprocess -m input_path=data/PPMR preprocessing=default,light,minimal   
 | `preprocessing.canny.high_threshold` | `200` | int |
 | `preprocessing.canny.aperture_size` | `3` | int |
 | `preprocessing.canny.blend_alpha` | `0.20` | float — 0.0 disables edge blending |
+| `preprocessing.save` | `false` | `true \| false` — save intermediate image after each step |
+| `preprocessing.save_dir` | `results/preprocessing_debug` | str — root directory for per-image step folders |
+
+**Pipeline debug images** (`preprocessing.save=true`):
+
+```bash
+uv run preprocess input_path=data/PPMR/PMGstudycaseslabelled/34/34cor_1/34cor_1_001.jpg preprocessing.save=true
+uv run preprocess input_path=data/PPMR preprocessing=default recursive=true preprocessing.save=true preprocessing.save_dir=results/my_debug
+```
+
+Saves one numbered PNG per active step under `<save_dir>/<image_stem>/`:
+
+```
+results/preprocessing_debug/
+└── 34cor_1_001/
+    ├── 00_input.png
+    ├── 02_normalization_min_max.png
+    ├── 03_clahe.png
+    ├── 04_bilateral.png
+    └── 05_canny.png
+```
 
 ---
 

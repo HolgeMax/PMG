@@ -1,6 +1,8 @@
 # @package _global_.preprocessing
 # Default preprocessing settings
 convert_to_grayscale: true
+save: false               # set true to save intermediate images after each step
+save_dir: results/preprocessing_debug
 
 normalization:
   method: min_max  # Options: min_max, zscore

@@ -90,6 +90,8 @@ class PreprocessingConfig:
     bilateral: Optional[BilateralFilterConfig] = None
     canny: CannyConfig = field(default_factory=CannyConfig)
     convert_to_grayscale: bool = True
+    save: bool = False
+    save_dir: str = "results/preprocessing_debug"
 
 
 # Default configuration matching Guha & Bhandage (2025) paper

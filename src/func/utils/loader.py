@@ -221,10 +221,9 @@ def process_one(
         ``source_type``, and ``file``.
     """
     img, meta = load_image(str(file_path), slice_idx)
-    result, _log = preprocess_image(img, preprocess_config)
-    metrics = evaluate_preprocessing(img, result)
-
     stem = file_path.name.split(".")[0]
+    result, _log = preprocess_image(img, preprocess_config, image_name=stem)
+    metrics = evaluate_preprocessing(img, result)
     dest_dir = _resolve_output_dir(file_path, output_dir, input_root)
     dest_dir.mkdir(parents=True, exist_ok=True)
 
