@@ -1,0 +1,4 @@
+subject,session,label,path
+brats-001,seg,PMG,data/nii_test/BraTS20_Training_001_seg.nii
+brats-006,seg,PMG,data/nii_test/BraTS20_Training_006_seg.nii
+brats-022,t1,HC,data/nii_test/BraTS20_Training_022_t1.nii

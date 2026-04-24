@@ -4,26 +4,6 @@
     "type": "split",
     "children": [
       {
-        "id": "a8c8ee9f0187bdbc",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "6f25226e9034dbc3",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Welcome.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Welcome"
-            }
-          }
-        ]
-      },
-      {
         "id": "fb83a441f4480b5d",
         "type": "tabs",
         "children": [
@@ -199,8 +179,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "6f25226e9034dbc3",
+  "active": "10f9949baa41c848",
   "lastOpenFiles": [
-    "Welcome.md"
+    "__init__.py.md",
+    "Deep Metric Learning (Embedding Space Learning).md",
+    "graph.canvas",
+    "Welcome.md",
+    "_COMMUNITY_Downsampling Control.md",
+    "_COMMUNITY_Obsidian Welcome.md",
+    "_COMMUNITY_Cross-Val CLI Node.md",
+    "_COMMUNITY_Package Init E.md",
+    "_COMMUNITY_Package Init D.md",
+    "_COMMUNITY_Package Init C.md",
+    "_COMMUNITY_Package Init B.md",
+    "_COMMUNITY_Package Init A.md",
+    "_COMMUNITY_Auxiliary Utilities.md",
+    "_COMMUNITY_Coronal Analysis.md",
+    "_COMMUNITY_JPEG to NII Conversion.md",
+    "_COMMUNITY_Skull Strip Analysis.md",
+    "_COMMUNITY_Skull Strip Demo.md",
+    "_COMMUNITY_Dataset Arrangement.md",
+    "_COMMUNITY_PMG Clinical Background.md",
+    "_COMMUNITY_CLI Entry Points.md",
+    "_COMMUNITY_Skull Stripping.md",
+    "_COMMUNITY_Alternative Preprocessing Research.md",
+    "_COMMUNITY_Git Automation Tasks.md",
+    "_COMMUNITY_Left Test Prediction.md",
+    "_COMMUNITY_KDE Prediction Drawing.md",
+    "_COMMUNITY_Test Prediction Copy.md",
+    "_COMMUNITY_Validation Prediction Drawing.md"
   ]
 }

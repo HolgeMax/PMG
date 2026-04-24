@@ -1,0 +1,26 @@
+# Patient data — never send to API
+data/
+
+# Model checkpoints and large binaries
+results/checkpoints/
+*.pt
+*.pth
+*.nii
+*.nii.gz
+*.jpg
+*.jpeg
+*.png
+
+# Hydra run outputs
+outputs/
+results/plots/
+results/pipeline_debug/
+
+# Python internals
+__pycache__/
+*.pyc
+.venv/
+.git/
+
+# Graphify own output
+graphify-out/

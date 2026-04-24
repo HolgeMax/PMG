@@ -4,6 +4,66 @@ Configuration is managed with **Hydra** — override any parameter on the comman
 
 ---
 
+## Volume Slicing (New Dataset)
+
+Slices 3D NIfTI volumes into 2D JPEG slices ready for the existing training pipeline.
+Run this on the server where the data lives. Paths in the CSV are resolved as local filesystem paths.
+
+```bash
+uv run slice-volumes                                                          # defaults
+uv run slice-volumes volume_slicing.metadata_file=data/pmg_labels.csv
+uv run slice-volumes volume_slicing.output_dir=/tmp/new_dataset
+uv run slice-volumes volume_slicing.slice_selection=central                   # middle 60%
+uv run slice-volumes volume_slicing.slice_selection=random volume_slicing.n_random_slices=80
+uv run slice-volumes volume_slicing.slice_selection=all
+```
+
+**Quick pipeline test (local BraTS volumes):**
+```bash
+uv run slice-volumes volume_slicing.metadata_file=data/nii_test_labels.csv volume_slicing.output_dir=data/nii_test_sliced
+```
+Uses `data/nii_test_labels.csv` (3 volumes: 2 PMG, 1 HC). No server access needed.
+
+**Metadata CSV format** (`data/pmg_labels.csv`):
+```
+subject,session,label,path
+sub-01,ses-001,PMG,/proc_bd5/.../sub-01_ses-001_T1w.nii.gz
+sub-0101,ses-001,HC,/proc_bd5/.../sub-0101_ses-001_T1w.nii.gz
+```
+`label` must be `PMG` (→ `PMGcases/`) or anything else, e.g. `HC` (→ `controlcases/`).
+
+| Parameter | Default | Options / type |
+|-----------|---------|----------------|
+| `volume_slicing.metadata_file` | `data/pmg_labels.csv` | path to CSV |
+| `volume_slicing.output_dir` | `data/new_dataset` | path to output directory |
+| `volume_slicing.axis` | `2` | `0`=sagittal · `1`=coronal · `2`=axial |
+| `volume_slicing.slice_selection` | `central` | `central \| all \| random` |
+| `volume_slicing.central_fraction` | `0.6` | float — fraction of slices kept from centre |
+| `volume_slicing.n_random_slices` | `80` | int — slices per volume when `random` |
+| `volume_slicing.jpeg_quality` | `95` | int |
+| `volume_slicing.seed` | `42` | int — RNG seed for `random` mode |
+
+**Output structure** (mirrors PPMR so the existing data loader works unchanged):
+```
+<output_dir>/
+├── PMGcases/<subject>/<session>/sub01-ses001_042_0_1.jpg
+└── controlcases/<subject>/<session>/sub0101-ses001_042_0_0.jpg
+```
+
+**Full workflow for new dataset:**
+```bash
+# 1. Slice volumes
+uv run slice-volumes volume_slicing.output_dir=/tmp/new_dataset
+
+# 2. Preprocess (reuses existing pipeline with any preset)
+uv run preprocess input_path=/tmp/new_dataset output_path=/tmp/new_dataset_default preprocessing=default recursive=true
+
+# 3. Train
+uv run train data_loader.data_dir=/tmp/new_dataset_default
+```
+
+---
+
 ## Preprocessing
 
 ```bash

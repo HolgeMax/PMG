@@ -1,0 +1,13 @@
+defaults:
+  - _self_
+
+volume_slicing:
+  metadata_file: data/pmg_labels.csv
+  output_dir: data/new_dataset
+  axis: 2
+  slice_selection: central   # all | central | random
+  central_fraction: 0.6
+  n_random_slices: 80
+  jpeg_quality: 95
+  seed: 42
+
