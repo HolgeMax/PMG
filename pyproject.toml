@@ -43,7 +43,6 @@ crossval      = "src.cli.crossval:crossval_cli"
 evaluate      = "src.cli.evaluate:evaluate_cli"
 slice-volumes = "src.cli.slice_volumes:slice_volumes_cli"
 
-
 # == Optional/Development Dependencies ==
 # These are tools for code quality, testing, and development.
 # You can install them with `uv pip install -e .[dev]`
