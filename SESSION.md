@@ -1,3 +1,36 @@
+### Session 17 - 03.05.26
+
+#### Theory Chapter — PMG, MRI, and Deep Learning
+
+**New file: `papers/my_paper/theory.md`**
+- Created full theory chapter outline covering: PMG neuropathology, aetiology, clinical presentation, diagnosis, MRI acquisition, and deep learning (CNNs, ResNet101, DenseNet201, transfer learning).
+- Generated via research hierarchy (agent-deployer → research-ceo → research-researcher → research-writer) using sources: NBK1329, MedlinePlus, Stutterd & Leventer (2014), He et al. (2016), Huang et al. (2017), Litjens et al. (2017), Raghu et al. (2019).
+
+**Iterative refinement of theory sections (mirroring Overleaf):**
+- Neuropathology: incorporated user's rewritten LaTeX text with grammar/wording fixes; added Severino et al. (2020) (*Brain*) for MCD classification framework and PMG definition ("disruption of cortical organisation with or without fusion of the overlying molecular layer").
+- Aetiology: updated infectious causes bullet with cCMV prevalence cascade (Grosse 2008, Kenneson 2007, Lawson 2025); added ischaemic causes citation (Park et al., 2021); fixed genetic causes paragraph structure.
+- Diagnosis: merged 2.1.4 and 2.2 into single "MRI in PMG Assessment" section; later restored 2.1.4 as standalone subsection per Overleaf structure.
+- MRI section: added MPRAGE sequence explanation; added acquisition parameter tables for Hvidovre dataset (3T Siemens Verio: TR=1900ms, TE=2.23ms, TI=900ms, 1×1×1mm³) and PPMR dataset (3T Skyra + 1.5T GE Cigna from Zhang et al.); replaced Markdown tables with LaTeX `booktabs` tables.
+
+**New citations added to theory.md references:**
+- Grosse et al. (2008), Kenneson & Cannon (2007) — cCMV birth prevalence
+- Lawson et al. (2025) — PMG in symptomatic cCMV cohort
+- Park et al. (2021) — TTTS and PMG in twin pregnancies
+- Severino et al. (2020, *Brain*) — MCD definitions and classification
+
+**Methods section planning:**
+- Discussed recommended subsections: Dataset, Data Splitting, Preprocessing, Model Architecture, Training Procedure, Evaluation, Confound Validation (naive CNN baseline).
+
+#### Open Items (carried forward from Session 16)
+- Fix `10cor_1_19__1.jpg` double-underscore filename
+- Investigate and restore `2control2cor_0_019_preprocessed_minimal.jpg`
+- Run end-to-end training with deterministic-split fix and verify split assignments
+- Validate FOV confound via naive CNN baseline experiment
+- Implement skull-stripping or brain bounding-box crop
+- Write methods section in Overleaf
+
+---
+
 ### Session 16 - 08.04.26
 
 #### Configurable Output Directory, Hydra CWD Fix & Notebook Plot Saving

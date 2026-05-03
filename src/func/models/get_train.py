@@ -202,7 +202,7 @@ def train_one_fold(
     best_ckpt = ckpt_dir / f"{run_tag}_best.pt"
     final_ckpt = ckpt_dir / f"{run_tag}_final.pt"
 
-    metrics_dir = Path(get_original_cwd()) / "results" / "metrics" / subdir
+    metrics_dir = output_root / "metrics" / subdir
     metrics_dir.mkdir(parents=True, exist_ok=True)
     csv_path = metrics_dir / f"{run_tag}_metrics.csv"
 
@@ -210,20 +210,26 @@ def train_one_fold(
         "epoch",
         "train_loss",
         "train_acc",
+        "train_balanced_acc",
         "train_precision",
         "train_recall",
+        "train_specificity",
         "train_f1",
         "train_kappa",
         "val_loss",
         "val_acc",
+        "val_balanced_acc",
         "val_precision",
         "val_recall",
+        "val_specificity",
         "val_f1",
         "val_kappa",
         "test_loss",
         "test_acc",
+        "test_balanced_acc",
         "test_precision",
         "test_recall",
+        "test_specificity",
         "test_f1",
         "test_kappa",
     ]
@@ -254,20 +260,26 @@ def train_one_fold(
                     "epoch": epoch + 1,
                     "train_loss": round(train_loss, 6),
                     "train_acc": round(train_m["accuracy"], 6),
+                    "train_balanced_acc": round(train_m["balanced_accuracy"], 6),
                     "train_precision": round(train_m["precision"], 6),
                     "train_recall": round(train_m["recall"], 6),
+                    "train_specificity": round(train_m["specificity"], 6),
                     "train_f1": round(train_m["f1"], 6),
                     "train_kappa": round(train_m["cohen_kappa"], 6),
                     "val_loss": round(val_loss, 6),
                     "val_acc": round(val_m["accuracy"], 6),
+                    "val_balanced_acc": round(val_m["balanced_accuracy"], 6),
                     "val_precision": round(val_m["precision"], 6),
                     "val_recall": round(val_m["recall"], 6),
+                    "val_specificity": round(val_m["specificity"], 6),
                     "val_f1": round(val_m["f1"], 6),
                     "val_kappa": round(val_m["cohen_kappa"], 6),
                     "test_loss": round(test_loss, 6),
                     "test_acc": round(test_m["accuracy"], 6),
+                    "test_balanced_acc": round(test_m["balanced_accuracy"], 6),
                     "test_precision": round(test_m["precision"], 6),
                     "test_recall": round(test_m["recall"], 6),
+                    "test_specificity": round(test_m["specificity"], 6),
                     "test_f1": round(test_m["f1"], 6),
                     "test_kappa": round(test_m["cohen_kappa"], 6),
                 }

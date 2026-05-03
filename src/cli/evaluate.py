@@ -113,8 +113,8 @@ def run_evaluate(cfg: DictConfig) -> None:
     csv_path = out_dir / "evaluation_summary.csv"
     fieldnames = [
         "checkpoint",
-        "accuracy", "precision", "recall", "f1", "cohen_kappa",
-        "tp", "tn", "fp", "fn",
+        "accuracy", "balanced_accuracy", "precision", "recall", "specificity",
+        "f1", "cohen_kappa", "tp", "tn", "fp", "fn",
     ]
     with open(csv_path, "w", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)

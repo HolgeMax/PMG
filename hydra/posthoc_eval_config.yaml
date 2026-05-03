@@ -1,0 +1,21 @@
+defaults:
+  - model@data_loader: data_loader
+  - model@model: model
+  - model@train: train
+  - _self_
+
+crossval:
+  n_folds: 5
+  val_frac_of_train: 0.15
+
+posthoc:
+  checkpoint_dir: results/checkpoints   # directory scanned recursively for *.pt files
+  only_best: true                        # false → also evaluate *_final.pt checkpoints
+  output_dir: results/post-hoc_metrics  # where posthoc_summary.csv is written
+
+hydra:
+  run:
+    dir: results/post-hoc_metrics/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: results/post-hoc_metrics/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

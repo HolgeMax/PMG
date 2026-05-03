@@ -112,10 +112,15 @@ def compute_metrics(
     p_e = p_pos + p_neg
     kappa = (accuracy - p_e) / (1 - p_e) if (1 - p_e) > 0 else 0.0
 
+    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+    balanced_accuracy = (recall + specificity) / 2
+
     return {
         "accuracy": accuracy,
+        "balanced_accuracy": balanced_accuracy,
         "precision": precision,
         "recall": recall,
+        "specificity": specificity,
         "f1": f1,
         "cohen_kappa": kappa,
         "tp": tp,
@@ -134,11 +139,13 @@ def print_metrics(metrics: dict[str, float], split: str = "") -> None:
     """Print a metrics dict in a readable table."""
     header = f"--- Metrics{' (' + split + ')' if split else ''} ---"
     print(header)
-    print(f"  Accuracy:      {metrics['accuracy']:.4f}")
-    print(f"  Precision:     {metrics['precision']:.4f}")
-    print(f"  Recall:        {metrics['recall']:.4f}")
-    print(f"  F1 Score:      {metrics['f1']:.4f}")
-    print(f"  Cohen's Kappa: {metrics['cohen_kappa']:.4f}")
+    print(f"  Accuracy:          {metrics['accuracy']:.4f}")
+    print(f"  Balanced Accuracy: {metrics['balanced_accuracy']:.4f}")
+    print(f"  Precision:         {metrics['precision']:.4f}")
+    print(f"  Recall (TPR):      {metrics['recall']:.4f}")
+    print(f"  Specificity (TNR): {metrics['specificity']:.4f}")
+    print(f"  F1 Score:          {metrics['f1']:.4f}")
+    print(f"  Cohen's Kappa:     {metrics['cohen_kappa']:.4f}")
     print(
         f"  TP={metrics['tp']}  TN={metrics['tn']}  FP={metrics['fp']}  FN={metrics['fn']}"
     )

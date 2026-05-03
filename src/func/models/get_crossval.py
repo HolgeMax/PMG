@@ -59,7 +59,7 @@ def _save_results(cfg, fold_results: list[dict]) -> None:
     suffix = "raw" if cfg.data_loader.train_raw else "preprocessed"
     base = f"{model_name}_{suffix}_crossval"
 
-    metric_keys = ["accuracy", "precision", "recall", "f1", "cohen_kappa"]
+    metric_keys = ["accuracy", "balanced_accuracy", "precision", "recall", "specificity", "f1", "cohen_kappa"]
 
     # Per-fold CSV
     per_fold_path = metrics_dir / f"{base}_per_fold.csv"
@@ -71,8 +71,10 @@ def _save_results(cfg, fold_results: list[dict]) -> None:
                 {
                     "fold": row["fold"],
                     "accuracy": round(row.get("accuracy", 0.0), 6),
+                    "balanced_accuracy": round(row.get("balanced_accuracy", 0.0), 6),
                     "precision": round(row.get("precision", 0.0), 6),
                     "recall": round(row.get("recall", 0.0), 6),
+                    "specificity": round(row.get("specificity", 0.0), 6),
                     "f1": round(row.get("f1", 0.0), 6),
                     "cohen_kappa": round(row.get("cohen_kappa", 0.0), 6),
                 }
