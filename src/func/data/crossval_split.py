@@ -11,7 +11,7 @@ from src.func.data.get_loader import PMGDataset, _undersample_to_minority
 def _patient_class(paths: list[Path]) -> int:
     """Determine the biological class (PMG=1, HC=0) of a patient from their slice paths."""
     for p in paths:
-        if "PMGcases" in p.parts:
+        if "PMGcases" in p.parts or "PMGstudycaseslabelled" in p.parts:
             return 1
         if "controlcases" in p.parts or "PMGControlsEditedDec2021" in p.parts:
             return 0

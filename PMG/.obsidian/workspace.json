@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "fb83a441f4480b5d",
+        "id": "6cf879bce690be83",
         "type": "tabs",
         "children": [
           {
-            "id": "10f9949baa41c848",
+            "id": "ae8ba6309d88c2f0",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "Untitled.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Untitled"
             }
           }
         ]
@@ -37,7 +41,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": true
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -179,8 +183,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "10f9949baa41c848",
+  "active": "74b1da7add628797",
   "lastOpenFiles": [
+    "2026-05-06.md",
+    "Untitled.md",
+    "Untitled",
     "__init__.py.md",
     "Deep Metric Learning (Embedding Space Learning).md",
     "graph.canvas",
@@ -205,8 +212,6 @@
     "_COMMUNITY_Alternative Preprocessing Research.md",
     "_COMMUNITY_Git Automation Tasks.md",
     "_COMMUNITY_Left Test Prediction.md",
-    "_COMMUNITY_KDE Prediction Drawing.md",
-    "_COMMUNITY_Test Prediction Copy.md",
-    "_COMMUNITY_Validation Prediction Drawing.md"
+    "_COMMUNITY_KDE Prediction Drawing.md"
   ]
 }

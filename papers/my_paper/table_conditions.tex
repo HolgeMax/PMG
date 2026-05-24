@@ -1,0 +1,42 @@
+% Requires in preamble:
+%   \usepackage{booktabs}
+%   \usepackage[table]{xcolor}
+%   \usepackage{threeparttable}
+
+\definecolor{rowgreen}{HTML}{C8E6C9}
+\definecolor{roworange}{HTML}{FFE0B2}
+
+\begin{table}[htbp]
+\centering
+\caption{Overview of the seven experimental conditions spanning three axes:
+         preprocessing (raw vs.\ preprocessed), label definition
+         (paper vs.\ corrected), and downsampling strategy
+         (none, pre-split, post-split).}
+\label{tab:conditions}
+\begin{threeparttable}
+  \begin{tabular}{clll}
+    \toprule
+    \textbf{Condition} & \textbf{Preprocessing} & \textbf{Labels} & \textbf{Downsampling} \\
+    \midrule
+    1 & Raw          & Paper     & None       \\
+    2 & Raw          & Corrected & None       \\
+    \rowcolor{rowgreen}
+    3 & Raw          & Corrected & Post-split \\
+    4 & Preprocessed & Paper     & None       \\
+    \rowcolor{roworange}
+    5 & Preprocessed & Paper     & Pre-split  \\
+    6 & Preprocessed & Corrected & None       \\
+    7 & Preprocessed & Corrected & Pre-split  \\
+    \bottomrule
+  \end{tabular}
+  \begin{tablenotes}
+    \footnotesize
+    \item[\textcolor{rowgreen!80!black}{$\blacksquare$}]
+      Condition~3: fully corrected — raw data eliminates the
+      resolution-confound amplification introduced by preprocessing.
+    \item[\textcolor{roworange!80!black}{$\blacksquare$}]
+      Condition~5: replication of Guha et al.\ (2025) exact setup
+      (preprocessed, paper labels, pre-split downsampling).
+  \end{tablenotes}
+\end{threeparttable}
+\end{table}

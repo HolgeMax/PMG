@@ -4,14 +4,17 @@ Accepts a single file **or** a directory as input_path.  When a directory is
 given, every supported file inside it is processed in one run.
 
 Usage — single file:
-    uv run preprocess input_path=data/nii_test/file.nii preprocessing=light
-    uv run preprocess input_path=data/PPMR/.../slice.jpg preprocessing=light
+    uv run preprocess input_path=data/nii_test/file.nii
+    uv run preprocess input_path=data/PPMR/.../slice.jpg
 
 Usage — directory (flat):
-    uv run preprocess input_path=data/nii_test preprocessing=light
+    uv run preprocess input_path=data/nii_test
 
 Usage — directory (recursive, e.g. PPMR patient tree):
-    uv run preprocess input_path=data/PPMR/PMGstudycaseslabelled preprocessing=light recursive=true
+    uv run preprocess input_path=data/PPMR/PMGstudycaseslabelled recursive=true
+
+Usage — non-default preprocessing preset:
+    uv run preprocess input_path=data/PPMR/PMGstudycaseslabelled preprocessing=no_clahe
 """
 
 import sys
