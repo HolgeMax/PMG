@@ -1,0 +1,344 @@
+Job:  pre_correct_presplit  (83)
+Node: hendrixgpu12fl.unicph.domain
+GPUs: 0
+[2026-05-26 15:24:29,254][HYDRA] Launching 2 jobs locally
+[2026-05-26 15:24:29,254][HYDRA] 	#0 : model.name=resnet101 data_loader.pmg_negative_mode=correct data_loader.balance_mode=pre_split
+Cross-validation on preprocessed data: data/PPMR_default
+Fold 1/5 — train: 3108 slices (65 patients), val: 470 slices (11 patients), test: 934 slices (20 patients)
+
+============================================================
+  FOLD 1 / 5
+============================================================
+Using device: cuda
+Built resnet101 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3108, val: 470, test: 934
+Epoch 1/20 — Train Loss: 0.3270  Acc: 0.8755 | Val Loss: 0.4995  Acc: 0.7957 | Test Loss: 0.2497  Acc: 0.9347
+Epoch 2/20 — Train Loss: 0.2008  Acc: 0.9199 | Val Loss: 0.4464  Acc: 0.7702 | Test Loss: 0.2548  Acc: 0.8983
+Epoch 3/20 — Train Loss: 0.1547  Acc: 0.9424 | Val Loss: 0.4884  Acc: 0.8362 | Test Loss: 0.2164  Acc: 0.9475
+Epoch 4/20 — Train Loss: 0.1491  Acc: 0.9466 | Val Loss: 0.5398  Acc: 0.8404 | Test Loss: 0.2127  Acc: 0.9529
+Epoch 5/20 — Train Loss: 0.1390  Acc: 0.9492 | Val Loss: 0.4836  Acc: 0.8511 | Test Loss: 0.2046  Acc: 0.9518
+Epoch 6/20 — Train Loss: 0.1267  Acc: 0.9546 | Val Loss: 0.4578  Acc: 0.8255 | Test Loss: 0.2067  Acc: 0.9379
+Epoch 7/20 — Train Loss: 0.1203  Acc: 0.9575 | Val Loss: 0.4766  Acc: 0.8340 | Test Loss: 0.2092  Acc: 0.9443
+Epoch 8/20 — Train Loss: 0.1060  Acc: 0.9604 | Val Loss: 0.5239  Acc: 0.8383 | Test Loss: 0.2020  Acc: 0.9454
+Epoch 9/20 — Train Loss: 0.1020  Acc: 0.9653 | Val Loss: 0.5108  Acc: 0.8340 | Test Loss: 0.2118  Acc: 0.9443
+Epoch 10/20 — Train Loss: 0.1146  Acc: 0.9607 | Val Loss: 0.4714  Acc: 0.8170 | Test Loss: 0.2254  Acc: 0.9251
+Epoch 11/20 — Train Loss: 0.1011  Acc: 0.9640 | Val Loss: 0.5540  Acc: 0.8298 | Test Loss: 0.2178  Acc: 0.9390
+Epoch 12/20 — Train Loss: 0.0934  Acc: 0.9701 | Val Loss: 0.5262  Acc: 0.8106 | Test Loss: 0.2334  Acc: 0.9283
+Epoch 13/20 — Train Loss: 0.0919  Acc: 0.9685 | Val Loss: 0.5327  Acc: 0.8383 | Test Loss: 0.2115  Acc: 0.9411
+Epoch 14/20 — Train Loss: 0.1102  Acc: 0.9566 | Val Loss: 0.4695  Acc: 0.8213 | Test Loss: 0.2172  Acc: 0.9304
+Epoch 15/20 — Train Loss: 0.0840  Acc: 0.9720 | Val Loss: 0.4820  Acc: 0.8149 | Test Loss: 0.2460  Acc: 0.9229
+Epoch 16/20 — Train Loss: 0.1039  Acc: 0.9620 | Val Loss: 0.4995  Acc: 0.8149 | Test Loss: 0.2015  Acc: 0.9390
+Epoch 17/20 — Train Loss: 0.1036  Acc: 0.9569 | Val Loss: 0.4547  Acc: 0.8362 | Test Loss: 0.1951  Acc: 0.9454
+Epoch 18/20 — Train Loss: 0.0891  Acc: 0.9675 | Val Loss: 0.5158  Acc: 0.8426 | Test Loss: 0.2050  Acc: 0.9454
+Epoch 19/20 — Train Loss: 0.0939  Acc: 0.9678 | Val Loss: 0.4948  Acc: 0.8447 | Test Loss: 0.2066  Acc: 0.9454
+Epoch 20/20 — Train Loss: 0.0832  Acc: 0.9701 | Val Loss: 0.5244  Acc: 0.8213 | Test Loss: 0.2184  Acc: 0.9315
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold1_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold1_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/resnet101_preprocessed_fold1_metrics.csv
+Fold 2/5 — train: 3245 slices (65 patients), val: 465 slices (12 patients), test: 802 slices (19 patients)
+
+============================================================
+  FOLD 2 / 5
+============================================================
+Using device: cuda
+Built resnet101 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3245, val: 465, test: 802
+Epoch 1/20 — Train Loss: 0.3441  Acc: 0.8672 | Val Loss: 0.2225  Acc: 0.9204 | Test Loss: 0.3189  Acc: 0.8566
+Epoch 2/20 — Train Loss: 0.2194  Acc: 0.9236 | Val Loss: 0.1390  Acc: 0.9591 | Test Loss: 0.2291  Acc: 0.9165
+Epoch 3/20 — Train Loss: 0.1965  Acc: 0.9325 | Val Loss: 0.1381  Acc: 0.9634 | Test Loss: 0.2673  Acc: 0.8990
+Epoch 4/20 — Train Loss: 0.1704  Acc: 0.9455 | Val Loss: 0.1165  Acc: 0.9656 | Test Loss: 0.2503  Acc: 0.9027
+Epoch 5/20 — Train Loss: 0.1707  Acc: 0.9378 | Val Loss: 0.1359  Acc: 0.9570 | Test Loss: 0.2718  Acc: 0.8990
+Epoch 6/20 — Train Loss: 0.1421  Acc: 0.9513 | Val Loss: 0.1140  Acc: 0.9699 | Test Loss: 0.2450  Acc: 0.9090
+Epoch 7/20 — Train Loss: 0.1389  Acc: 0.9525 | Val Loss: 0.1059  Acc: 0.9677 | Test Loss: 0.2457  Acc: 0.9115
+Epoch 8/20 — Train Loss: 0.1363  Acc: 0.9510 | Val Loss: 0.1663  Acc: 0.9355 | Test Loss: 0.3635  Acc: 0.8653
+Epoch 9/20 — Train Loss: 0.1440  Acc: 0.9464 | Val Loss: 0.0975  Acc: 0.9806 | Test Loss: 0.2684  Acc: 0.9040
+Epoch 10/20 — Train Loss: 0.1410  Acc: 0.9461 | Val Loss: 0.0847  Acc: 0.9720 | Test Loss: 0.2169  Acc: 0.9214
+Epoch 11/20 — Train Loss: 0.1183  Acc: 0.9559 | Val Loss: 0.0752  Acc: 0.9785 | Test Loss: 0.2331  Acc: 0.9165
+Epoch 12/20 — Train Loss: 0.1105  Acc: 0.9649 | Val Loss: 0.0770  Acc: 0.9785 | Test Loss: 0.2420  Acc: 0.9127
+Epoch 13/20 — Train Loss: 0.1124  Acc: 0.9593 | Val Loss: 0.1123  Acc: 0.9634 | Test Loss: 0.2314  Acc: 0.9214
+Epoch 14/20 — Train Loss: 0.1099  Acc: 0.9602 | Val Loss: 0.0979  Acc: 0.9591 | Test Loss: 0.2373  Acc: 0.9190
+Epoch 15/20 — Train Loss: 0.1066  Acc: 0.9618 | Val Loss: 0.0763  Acc: 0.9699 | Test Loss: 0.2276  Acc: 0.9214
+Epoch 16/20 — Train Loss: 0.0935  Acc: 0.9680 | Val Loss: 0.0871  Acc: 0.9634 | Test Loss: 0.2451  Acc: 0.9227
+Epoch 17/20 — Train Loss: 0.1035  Acc: 0.9658 | Val Loss: 0.0698  Acc: 0.9742 | Test Loss: 0.2189  Acc: 0.9214
+Epoch 18/20 — Train Loss: 0.1071  Acc: 0.9655 | Val Loss: 0.0812  Acc: 0.9613 | Test Loss: 0.2306  Acc: 0.9252
+Epoch 19/20 — Train Loss: 0.1091  Acc: 0.9590 | Val Loss: 0.0759  Acc: 0.9806 | Test Loss: 0.2760  Acc: 0.9090
+Epoch 20/20 — Train Loss: 0.0990  Acc: 0.9664 | Val Loss: 0.0706  Acc: 0.9720 | Test Loss: 0.2101  Acc: 0.9289
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold2_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold2_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/resnet101_preprocessed_fold2_metrics.csv
+Fold 3/5 — train: 2870 slices (65 patients), val: 723 slices (12 patients), test: 919 slices (19 patients)
+
+============================================================
+  FOLD 3 / 5
+============================================================
+Using device: cuda
+Built resnet101 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 2870, val: 723, test: 919
+Epoch 1/20 — Train Loss: 0.3179  Acc: 0.8714 | Val Loss: 0.9018  Acc: 0.7303 | Test Loss: 0.2004  Acc: 0.9358
+Epoch 2/20 — Train Loss: 0.1949  Acc: 0.9334 | Val Loss: 1.0559  Acc: 0.7095 | Test Loss: 0.1808  Acc: 0.9489
+Epoch 3/20 — Train Loss: 0.1633  Acc: 0.9432 | Val Loss: 0.8654  Acc: 0.7289 | Test Loss: 0.1492  Acc: 0.9499
+Epoch 4/20 — Train Loss: 0.1554  Acc: 0.9443 | Val Loss: 1.6824  Acc: 0.5754 | Test Loss: 0.3073  Acc: 0.8683
+Epoch 5/20 — Train Loss: 0.1358  Acc: 0.9502 | Val Loss: 1.1180  Acc: 0.7123 | Test Loss: 0.1378  Acc: 0.9597
+Epoch 6/20 — Train Loss: 0.1271  Acc: 0.9564 | Val Loss: 1.0877  Acc: 0.6999 | Test Loss: 0.1681  Acc: 0.9402
+Epoch 7/20 — Train Loss: 0.1204  Acc: 0.9585 | Val Loss: 1.2452  Acc: 0.6916 | Test Loss: 0.1765  Acc: 0.9358
+Epoch 8/20 — Train Loss: 0.1163  Acc: 0.9585 | Val Loss: 1.0987  Acc: 0.7137 | Test Loss: 0.1812  Acc: 0.9358
+Epoch 9/20 — Train Loss: 0.1125  Acc: 0.9589 | Val Loss: 1.5568  Acc: 0.6639 | Test Loss: 0.2202  Acc: 0.9227
+Epoch 10/20 — Train Loss: 0.0971  Acc: 0.9624 | Val Loss: 1.1404  Acc: 0.7137 | Test Loss: 0.1815  Acc: 0.9391
+Epoch 11/20 — Train Loss: 0.0937  Acc: 0.9697 | Val Loss: 1.7257  Acc: 0.6058 | Test Loss: 0.3080  Acc: 0.8705
+Epoch 12/20 — Train Loss: 0.0974  Acc: 0.9672 | Val Loss: 2.2844  Acc: 0.5643 | Test Loss: 0.4163  Acc: 0.8303
+Epoch 13/20 — Train Loss: 0.0954  Acc: 0.9652 | Val Loss: 1.1545  Acc: 0.7040 | Test Loss: 0.1848  Acc: 0.9325
+Epoch 14/20 — Train Loss: 0.0954  Acc: 0.9648 | Val Loss: 1.6775  Acc: 0.6487 | Test Loss: 0.2761  Acc: 0.9010
+Epoch 15/20 — Train Loss: 0.1055  Acc: 0.9666 | Val Loss: 1.9582  Acc: 0.5989 | Test Loss: 0.3557  Acc: 0.8368
+Epoch 16/20 — Train Loss: 0.0772  Acc: 0.9742 | Val Loss: 1.4132  Acc: 0.6999 | Test Loss: 0.2051  Acc: 0.9217
+Epoch 17/20 — Train Loss: 0.0792  Acc: 0.9728 | Val Loss: 1.5000  Acc: 0.6833 | Test Loss: 0.2085  Acc: 0.9227
+Epoch 18/20 — Train Loss: 0.0919  Acc: 0.9655 | Val Loss: 2.1682  Acc: 0.6210 | Test Loss: 0.3390  Acc: 0.8716
+Epoch 19/20 — Train Loss: 0.0903  Acc: 0.9693 | Val Loss: 1.9058  Acc: 0.6777 | Test Loss: 0.2445  Acc: 0.9119
+Epoch 20/20 — Train Loss: 0.0741  Acc: 0.9735 | Val Loss: 1.6648  Acc: 0.6846 | Test Loss: 0.2320  Acc: 0.9184
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold3_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold3_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/resnet101_preprocessed_fold3_metrics.csv
+Fold 4/5 — train: 3135 slices (65 patients), val: 495 slices (12 patients), test: 882 slices (19 patients)
+
+============================================================
+  FOLD 4 / 5
+============================================================
+Using device: cuda
+Built resnet101 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3135, val: 495, test: 882
+Epoch 1/20 — Train Loss: 0.3549  Acc: 0.8660 | Val Loss: 0.2196  Acc: 0.9293 | Test Loss: 0.2426  Acc: 0.9240
+Epoch 2/20 — Train Loss: 0.2169  Acc: 0.9247 | Val Loss: 0.2450  Acc: 0.9172 | Test Loss: 0.2139  Acc: 0.9320
+Epoch 3/20 — Train Loss: 0.1957  Acc: 0.9324 | Val Loss: 0.2200  Acc: 0.9333 | Test Loss: 0.2159  Acc: 0.9218
+Epoch 4/20 — Train Loss: 0.1727  Acc: 0.9419 | Val Loss: 0.3183  Acc: 0.8788 | Test Loss: 0.2267  Acc: 0.9104
+Epoch 5/20 — Train Loss: 0.1552  Acc: 0.9490 | Val Loss: 0.2338  Acc: 0.9152 | Test Loss: 0.2120  Acc: 0.9195
+Epoch 6/20 — Train Loss: 0.1419  Acc: 0.9509 | Val Loss: 0.2068  Acc: 0.9354 | Test Loss: 0.2089  Acc: 0.9172
+Epoch 7/20 — Train Loss: 0.1348  Acc: 0.9534 | Val Loss: 0.2586  Acc: 0.9212 | Test Loss: 0.2145  Acc: 0.9138
+Epoch 8/20 — Train Loss: 0.1277  Acc: 0.9569 | Val Loss: 0.3095  Acc: 0.8828 | Test Loss: 0.2483  Acc: 0.9059
+Epoch 9/20 — Train Loss: 0.1294  Acc: 0.9518 | Val Loss: 0.2327  Acc: 0.9192 | Test Loss: 0.2359  Acc: 0.9093
+Epoch 10/20 — Train Loss: 0.1175  Acc: 0.9579 | Val Loss: 0.2031  Acc: 0.9232 | Test Loss: 0.2128  Acc: 0.9240
+Epoch 11/20 — Train Loss: 0.1239  Acc: 0.9547 | Val Loss: 0.2003  Acc: 0.9253 | Test Loss: 0.2542  Acc: 0.8934
+Epoch 12/20 — Train Loss: 0.1268  Acc: 0.9537 | Val Loss: 0.2162  Acc: 0.9253 | Test Loss: 0.2438  Acc: 0.8980
+Epoch 13/20 — Train Loss: 0.1091  Acc: 0.9652 | Val Loss: 0.2885  Acc: 0.9010 | Test Loss: 0.2368  Acc: 0.9036
+Epoch 14/20 — Train Loss: 0.1029  Acc: 0.9652 | Val Loss: 0.1939  Acc: 0.9394 | Test Loss: 0.2493  Acc: 0.9025
+Epoch 15/20 — Train Loss: 0.1096  Acc: 0.9585 | Val Loss: 0.1854  Acc: 0.9293 | Test Loss: 0.2786  Acc: 0.8912
+Epoch 16/20 — Train Loss: 0.1128  Acc: 0.9550 | Val Loss: 0.2507  Acc: 0.9232 | Test Loss: 0.2335  Acc: 0.9184
+Epoch 17/20 — Train Loss: 0.1000  Acc: 0.9652 | Val Loss: 0.2365  Acc: 0.9232 | Test Loss: 0.2867  Acc: 0.8753
+Epoch 18/20 — Train Loss: 0.1001  Acc: 0.9624 | Val Loss: 0.2758  Acc: 0.9172 | Test Loss: 0.2700  Acc: 0.9048
+Epoch 19/20 — Train Loss: 0.0967  Acc: 0.9656 | Val Loss: 0.1810  Acc: 0.9333 | Test Loss: 0.2632  Acc: 0.8855
+Epoch 20/20 — Train Loss: 0.0947  Acc: 0.9675 | Val Loss: 0.1967  Acc: 0.9293 | Test Loss: 0.2528  Acc: 0.9082
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold4_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold4_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/resnet101_preprocessed_fold4_metrics.csv
+Fold 5/5 — train: 3194 slices (65 patients), val: 343 slices (12 patients), test: 975 slices (19 patients)
+
+============================================================
+  FOLD 5 / 5
+============================================================
+Using device: cuda
+Built resnet101 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3194, val: 343, test: 975
+Epoch 1/20 — Train Loss: 0.2835  Acc: 0.9054 | Val Loss: 0.1042  Acc: 0.9708 | Test Loss: 0.7562  Acc: 0.7569
+Epoch 2/20 — Train Loss: 0.1735  Acc: 0.9443 | Val Loss: 0.0633  Acc: 0.9767 | Test Loss: 0.9273  Acc: 0.7446
+Epoch 3/20 — Train Loss: 0.1470  Acc: 0.9515 | Val Loss: 0.0625  Acc: 0.9796 | Test Loss: 0.8301  Acc: 0.7487
+Epoch 4/20 — Train Loss: 0.1308  Acc: 0.9596 | Val Loss: 0.0654  Acc: 0.9825 | Test Loss: 0.8668  Acc: 0.7518
+Epoch 5/20 — Train Loss: 0.1230  Acc: 0.9577 | Val Loss: 0.0428  Acc: 0.9825 | Test Loss: 1.0688  Acc: 0.7344
+Epoch 6/20 — Train Loss: 0.1100  Acc: 0.9590 | Val Loss: 0.0477  Acc: 0.9825 | Test Loss: 1.0067  Acc: 0.7508
+Epoch 7/20 — Train Loss: 0.1132  Acc: 0.9618 | Val Loss: 0.0445  Acc: 0.9825 | Test Loss: 1.0108  Acc: 0.7559
+Epoch 8/20 — Train Loss: 0.0956  Acc: 0.9681 | Val Loss: 0.0339  Acc: 0.9854 | Test Loss: 1.2232  Acc: 0.7292
+Epoch 9/20 — Train Loss: 0.1069  Acc: 0.9612 | Val Loss: 0.0419  Acc: 0.9825 | Test Loss: 1.0896  Acc: 0.7456
+Epoch 10/20 — Train Loss: 0.1002  Acc: 0.9615 | Val Loss: 0.0404  Acc: 0.9883 | Test Loss: 1.0592  Acc: 0.7508
+Epoch 11/20 — Train Loss: 0.0981  Acc: 0.9643 | Val Loss: 0.0574  Acc: 0.9825 | Test Loss: 0.9472  Acc: 0.7621
+Epoch 12/20 — Train Loss: 0.0900  Acc: 0.9671 | Val Loss: 0.0957  Acc: 0.9650 | Test Loss: 0.8977  Acc: 0.7538
+Epoch 13/20 — Train Loss: 0.0932  Acc: 0.9678 | Val Loss: 0.0452  Acc: 0.9854 | Test Loss: 1.0431  Acc: 0.7549
+Epoch 14/20 — Train Loss: 0.0876  Acc: 0.9696 | Val Loss: 0.0544  Acc: 0.9825 | Test Loss: 1.0058  Acc: 0.7549
+Epoch 15/20 — Train Loss: 0.0810  Acc: 0.9737 | Val Loss: 0.0389  Acc: 0.9825 | Test Loss: 1.1803  Acc: 0.7579
+Epoch 16/20 — Train Loss: 0.0916  Acc: 0.9693 | Val Loss: 0.0548  Acc: 0.9796 | Test Loss: 1.0810  Acc: 0.7518
+Epoch 17/20 — Train Loss: 0.0926  Acc: 0.9640 | Val Loss: 0.0266  Acc: 0.9854 | Test Loss: 1.4022  Acc: 0.7477
+Epoch 18/20 — Train Loss: 0.0832  Acc: 0.9699 | Val Loss: 0.0429  Acc: 0.9854 | Test Loss: 1.2433  Acc: 0.7569
+Epoch 19/20 — Train Loss: 0.0782  Acc: 0.9712 | Val Loss: 0.0570  Acc: 0.9738 | Test Loss: 1.1218  Acc: 0.7610
+Epoch 20/20 — Train Loss: 0.0784  Acc: 0.9724 | Val Loss: 0.0334  Acc: 0.9854 | Test Loss: 1.2732  Acc: 0.7610
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold5_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/resnet101_preprocessed_fold5_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/resnet101_preprocessed_fold5_metrics.csv
+
+Cross-validation complete.
+  Per-fold results → results/metrics/crossvalidation/resnet101_preprocessed_crossval_per_fold.csv
+  Summary          → results/metrics/crossvalidation/resnet101_preprocessed_crossval_summary.csv
+
+  Mean test metrics across 5 folds:
+    accuracy       0.8806
+    balanced_accuracy 0.8811
+    precision      0.9147
+    recall         0.835
+    specificity    0.9273
+    f1             0.8681
+    cohen_kappa    0.7599
+[2026-05-26 15:55:53,764][HYDRA] 	#1 : model.name=densenet201 data_loader.pmg_negative_mode=correct data_loader.balance_mode=pre_split
+Cross-validation on preprocessed data: data/PPMR_default
+Fold 1/5 — train: 3108 slices (65 patients), val: 470 slices (11 patients), test: 934 slices (20 patients)
+
+============================================================
+  FOLD 1 / 5
+============================================================
+Using device: cuda
+Built densenet201 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3108, val: 470, test: 934
+Epoch 1/20 — Train Loss: 0.3240  Acc: 0.8713 | Val Loss: 0.3292  Acc: 0.8830 | Test Loss: 0.2050  Acc: 0.9379
+Epoch 2/20 — Train Loss: 0.1803  Acc: 0.9308 | Val Loss: 0.3598  Acc: 0.8553 | Test Loss: 0.1929  Acc: 0.9443
+Epoch 3/20 — Train Loss: 0.1550  Acc: 0.9427 | Val Loss: 0.3740  Acc: 0.8553 | Test Loss: 0.2006  Acc: 0.9400
+Epoch 4/20 — Train Loss: 0.1596  Acc: 0.9376 | Val Loss: 0.5236  Acc: 0.8149 | Test Loss: 0.2448  Acc: 0.9347
+Epoch 5/20 — Train Loss: 0.1348  Acc: 0.9543 | Val Loss: 0.3894  Acc: 0.8489 | Test Loss: 0.2031  Acc: 0.9400
+Epoch 6/20 — Train Loss: 0.1213  Acc: 0.9530 | Val Loss: 0.4739  Acc: 0.8447 | Test Loss: 0.2204  Acc: 0.9443
+Epoch 7/20 — Train Loss: 0.1139  Acc: 0.9591 | Val Loss: 0.4470  Acc: 0.8426 | Test Loss: 0.2159  Acc: 0.9390
+Epoch 8/20 — Train Loss: 0.1165  Acc: 0.9566 | Val Loss: 0.3948  Acc: 0.8489 | Test Loss: 0.2099  Acc: 0.9358
+Epoch 9/20 — Train Loss: 0.1122  Acc: 0.9595 | Val Loss: 0.4105  Acc: 0.8532 | Test Loss: 0.2194  Acc: 0.9283
+Epoch 10/20 — Train Loss: 0.0969  Acc: 0.9636 | Val Loss: 0.5189  Acc: 0.8255 | Test Loss: 0.2240  Acc: 0.9400
+Epoch 11/20 — Train Loss: 0.1004  Acc: 0.9636 | Val Loss: 0.4796  Acc: 0.8362 | Test Loss: 0.2227  Acc: 0.9454
+Epoch 12/20 — Train Loss: 0.0894  Acc: 0.9646 | Val Loss: 0.6864  Acc: 0.8128 | Test Loss: 0.2825  Acc: 0.9358
+Epoch 13/20 — Train Loss: 0.0921  Acc: 0.9662 | Val Loss: 0.3897  Acc: 0.8511 | Test Loss: 0.2284  Acc: 0.9154
+Epoch 14/20 — Train Loss: 0.0950  Acc: 0.9669 | Val Loss: 0.4035  Acc: 0.8660 | Test Loss: 0.2127  Acc: 0.9422
+Epoch 15/20 — Train Loss: 0.1125  Acc: 0.9617 | Val Loss: 0.4473  Acc: 0.8638 | Test Loss: 0.2214  Acc: 0.9400
+Epoch 16/20 — Train Loss: 0.0998  Acc: 0.9620 | Val Loss: 0.4611  Acc: 0.8574 | Test Loss: 0.2207  Acc: 0.9465
+Epoch 17/20 — Train Loss: 0.0977  Acc: 0.9675 | Val Loss: 0.5676  Acc: 0.8149 | Test Loss: 0.2367  Acc: 0.9454
+Epoch 18/20 — Train Loss: 0.0711  Acc: 0.9772 | Val Loss: 0.3699  Acc: 0.8638 | Test Loss: 0.2289  Acc: 0.9197
+Epoch 19/20 — Train Loss: 0.1065  Acc: 0.9588 | Val Loss: 0.4704  Acc: 0.8553 | Test Loss: 0.2212  Acc: 0.9454
+Epoch 20/20 — Train Loss: 0.0816  Acc: 0.9710 | Val Loss: 0.4205  Acc: 0.8660 | Test Loss: 0.2244  Acc: 0.9400
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold1_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold1_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/densenet201_preprocessed_fold1_metrics.csv
+Fold 2/5 — train: 3245 slices (65 patients), val: 465 slices (12 patients), test: 802 slices (19 patients)
+
+============================================================
+  FOLD 2 / 5
+============================================================
+Using device: cuda
+Built densenet201 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3245, val: 465, test: 802
+Epoch 1/20 — Train Loss: 0.3284  Acc: 0.8644 | Val Loss: 0.1529  Acc: 0.9505 | Test Loss: 0.2418  Acc: 0.9202
+Epoch 2/20 — Train Loss: 0.2144  Acc: 0.9257 | Val Loss: 0.0963  Acc: 0.9871 | Test Loss: 0.2272  Acc: 0.9127
+Epoch 3/20 — Train Loss: 0.1866  Acc: 0.9387 | Val Loss: 0.0971  Acc: 0.9763 | Test Loss: 0.2054  Acc: 0.9339
+Epoch 4/20 — Train Loss: 0.1735  Acc: 0.9387 | Val Loss: 0.0718  Acc: 0.9806 | Test Loss: 0.2009  Acc: 0.9252
+Epoch 5/20 — Train Loss: 0.1456  Acc: 0.9495 | Val Loss: 0.0881  Acc: 0.9763 | Test Loss: 0.2154  Acc: 0.9202
+Epoch 6/20 — Train Loss: 0.1522  Acc: 0.9458 | Val Loss: 0.0848  Acc: 0.9742 | Test Loss: 0.2058  Acc: 0.9277
+Epoch 7/20 — Train Loss: 0.1384  Acc: 0.9479 | Val Loss: 0.0890  Acc: 0.9720 | Test Loss: 0.2101  Acc: 0.9252
+Epoch 8/20 — Train Loss: 0.1323  Acc: 0.9541 | Val Loss: 0.0770  Acc: 0.9742 | Test Loss: 0.2010  Acc: 0.9314
+Epoch 9/20 — Train Loss: 0.1240  Acc: 0.9550 | Val Loss: 0.0853  Acc: 0.9763 | Test Loss: 0.2138  Acc: 0.9277
+Epoch 10/20 — Train Loss: 0.1209  Acc: 0.9562 | Val Loss: 0.0773  Acc: 0.9763 | Test Loss: 0.2017  Acc: 0.9314
+Epoch 11/20 — Train Loss: 0.1124  Acc: 0.9618 | Val Loss: 0.1392  Acc: 0.9398 | Test Loss: 0.2712  Acc: 0.8990
+Epoch 12/20 — Train Loss: 0.1257  Acc: 0.9516 | Val Loss: 0.0646  Acc: 0.9806 | Test Loss: 0.1998  Acc: 0.9327
+Epoch 13/20 — Train Loss: 0.1421  Acc: 0.9467 | Val Loss: 0.0858  Acc: 0.9763 | Test Loss: 0.2101  Acc: 0.9289
+Epoch 14/20 — Train Loss: 0.1124  Acc: 0.9587 | Val Loss: 0.0884  Acc: 0.9699 | Test Loss: 0.2249  Acc: 0.9202
+Epoch 15/20 — Train Loss: 0.1018  Acc: 0.9655 | Val Loss: 0.0850  Acc: 0.9634 | Test Loss: 0.2155  Acc: 0.9252
+Epoch 16/20 — Train Loss: 0.1052  Acc: 0.9584 | Val Loss: 0.0790  Acc: 0.9785 | Test Loss: 0.2262  Acc: 0.9252
+Epoch 17/20 — Train Loss: 0.0844  Acc: 0.9716 | Val Loss: 0.0657  Acc: 0.9763 | Test Loss: 0.2102  Acc: 0.9327
+Epoch 18/20 — Train Loss: 0.0962  Acc: 0.9658 | Val Loss: 0.0818  Acc: 0.9699 | Test Loss: 0.2114  Acc: 0.9314
+Epoch 19/20 — Train Loss: 0.1145  Acc: 0.9587 | Val Loss: 0.0695  Acc: 0.9785 | Test Loss: 0.2148  Acc: 0.9314
+Epoch 20/20 — Train Loss: 0.0977  Acc: 0.9649 | Val Loss: 0.0733  Acc: 0.9720 | Test Loss: 0.2202  Acc: 0.9264
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold2_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold2_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/densenet201_preprocessed_fold2_metrics.csv
+Fold 3/5 — train: 2870 slices (65 patients), val: 723 slices (12 patients), test: 919 slices (19 patients)
+
+============================================================
+  FOLD 3 / 5
+============================================================
+Using device: cuda
+Built densenet201 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 2870, val: 723, test: 919
+Epoch 1/20 — Train Loss: 0.2985  Acc: 0.8850 | Val Loss: 0.3629  Acc: 0.7994 | Test Loss: 0.1445  Acc: 0.9674
+Epoch 2/20 — Train Loss: 0.1830  Acc: 0.9314 | Val Loss: 0.5833  Acc: 0.7344 | Test Loss: 0.1223  Acc: 0.9684
+Epoch 3/20 — Train Loss: 0.1621  Acc: 0.9418 | Val Loss: 0.6750  Acc: 0.7248 | Test Loss: 0.1320  Acc: 0.9674
+Epoch 4/20 — Train Loss: 0.1353  Acc: 0.9484 | Val Loss: 0.5340  Acc: 0.7566 | Test Loss: 0.1040  Acc: 0.9739
+Epoch 5/20 — Train Loss: 0.1630  Acc: 0.9376 | Val Loss: 0.8414  Acc: 0.7123 | Test Loss: 0.1708  Acc: 0.9358
+Epoch 6/20 — Train Loss: 0.1323  Acc: 0.9502 | Val Loss: 1.1709  Acc: 0.6763 | Test Loss: 0.2550  Acc: 0.8814
+Epoch 7/20 — Train Loss: 0.1219  Acc: 0.9564 | Val Loss: 0.8677  Acc: 0.7082 | Test Loss: 0.1881  Acc: 0.9249
+Epoch 8/20 — Train Loss: 0.1154  Acc: 0.9575 | Val Loss: 0.7298  Acc: 0.7414 | Test Loss: 0.1167  Acc: 0.9684
+Epoch 9/20 — Train Loss: 0.1191  Acc: 0.9578 | Val Loss: 1.0103  Acc: 0.7151 | Test Loss: 0.1620  Acc: 0.9304
+Epoch 10/20 — Train Loss: 0.1210  Acc: 0.9564 | Val Loss: 0.7542  Acc: 0.7414 | Test Loss: 0.1254  Acc: 0.9663
+Epoch 11/20 — Train Loss: 0.1231  Acc: 0.9547 | Val Loss: 1.0350  Acc: 0.7151 | Test Loss: 0.1846  Acc: 0.9162
+Epoch 12/20 — Train Loss: 0.1035  Acc: 0.9603 | Val Loss: 0.8395  Acc: 0.7303 | Test Loss: 0.1527  Acc: 0.9445
+Epoch 13/20 — Train Loss: 0.0970  Acc: 0.9641 | Val Loss: 1.8630  Acc: 0.5934 | Test Loss: 0.5352  Acc: 0.7291
+Epoch 14/20 — Train Loss: 0.0991  Acc: 0.9582 | Val Loss: 0.8962  Acc: 0.7331 | Test Loss: 0.1585  Acc: 0.9336
+Epoch 15/20 — Train Loss: 0.1099  Acc: 0.9603 | Val Loss: 0.8726  Acc: 0.7275 | Test Loss: 0.1696  Acc: 0.9271
+Epoch 16/20 — Train Loss: 0.0866  Acc: 0.9669 | Val Loss: 0.9420  Acc: 0.7441 | Test Loss: 0.1351  Acc: 0.9565
+Epoch 17/20 — Train Loss: 0.0819  Acc: 0.9711 | Val Loss: 1.4890  Acc: 0.6833 | Test Loss: 0.3068  Acc: 0.8281
+Epoch 18/20 — Train Loss: 0.0928  Acc: 0.9627 | Val Loss: 1.2329  Acc: 0.7012 | Test Loss: 0.2551  Acc: 0.8509
+Epoch 19/20 — Train Loss: 0.0960  Acc: 0.9634 | Val Loss: 1.4832  Acc: 0.6888 | Test Loss: 0.2578  Acc: 0.8662
+Epoch 20/20 — Train Loss: 0.0894  Acc: 0.9620 | Val Loss: 1.7217  Acc: 0.6611 | Test Loss: 0.4162  Acc: 0.7867
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold3_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold3_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/densenet201_preprocessed_fold3_metrics.csv
+Fold 4/5 — train: 3135 slices (65 patients), val: 495 slices (12 patients), test: 882 slices (19 patients)
+
+============================================================
+  FOLD 4 / 5
+============================================================
+Using device: cuda
+Built densenet201 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3135, val: 495, test: 882
+Epoch 1/20 — Train Loss: 0.3375  Acc: 0.8740 | Val Loss: 0.2392  Acc: 0.9374 | Test Loss: 0.1870  Acc: 0.9410
+Epoch 2/20 — Train Loss: 0.1985  Acc: 0.9343 | Val Loss: 0.1872  Acc: 0.9414 | Test Loss: 0.1848  Acc: 0.9240
+Epoch 3/20 — Train Loss: 0.1994  Acc: 0.9279 | Val Loss: 0.1606  Acc: 0.9333 | Test Loss: 0.2410  Acc: 0.8900
+Epoch 4/20 — Train Loss: 0.1644  Acc: 0.9416 | Val Loss: 0.1697  Acc: 0.9515 | Test Loss: 0.1850  Acc: 0.9252
+Epoch 5/20 — Train Loss: 0.1481  Acc: 0.9496 | Val Loss: 0.1461  Acc: 0.9515 | Test Loss: 0.1937  Acc: 0.9240
+Epoch 6/20 — Train Loss: 0.1316  Acc: 0.9550 | Val Loss: 0.1432  Acc: 0.9556 | Test Loss: 0.1927  Acc: 0.9240
+Epoch 7/20 — Train Loss: 0.1435  Acc: 0.9486 | Val Loss: 0.4233  Acc: 0.8242 | Test Loss: 0.2967  Acc: 0.9059
+Epoch 8/20 — Train Loss: 0.1339  Acc: 0.9512 | Val Loss: 0.1580  Acc: 0.9576 | Test Loss: 0.1873  Acc: 0.9252
+Epoch 9/20 — Train Loss: 0.1300  Acc: 0.9474 | Val Loss: 0.2377  Acc: 0.9131 | Test Loss: 0.2145  Acc: 0.9320
+Epoch 10/20 — Train Loss: 0.1203  Acc: 0.9547 | Val Loss: 0.1442  Acc: 0.9576 | Test Loss: 0.2077  Acc: 0.9218
+Epoch 11/20 — Train Loss: 0.1110  Acc: 0.9598 | Val Loss: 0.1587  Acc: 0.9434 | Test Loss: 0.2006  Acc: 0.9240
+Epoch 12/20 — Train Loss: 0.1159  Acc: 0.9573 | Val Loss: 0.1417  Acc: 0.9394 | Test Loss: 0.3040  Acc: 0.8662
+Epoch 13/20 — Train Loss: 0.1109  Acc: 0.9620 | Val Loss: 0.1347  Acc: 0.9535 | Test Loss: 0.2159  Acc: 0.9195
+Epoch 14/20 — Train Loss: 0.1090  Acc: 0.9589 | Val Loss: 0.1418  Acc: 0.9535 | Test Loss: 0.2076  Acc: 0.9218
+Epoch 15/20 — Train Loss: 0.0934  Acc: 0.9614 | Val Loss: 0.1458  Acc: 0.9515 | Test Loss: 0.2234  Acc: 0.9150
+Epoch 16/20 — Train Loss: 0.1122  Acc: 0.9547 | Val Loss: 0.1315  Acc: 0.9576 | Test Loss: 0.2513  Acc: 0.9036
+Epoch 17/20 — Train Loss: 0.0943  Acc: 0.9646 | Val Loss: 0.1452  Acc: 0.9556 | Test Loss: 0.2231  Acc: 0.9184
+Epoch 18/20 — Train Loss: 0.1072  Acc: 0.9611 | Val Loss: 0.1450  Acc: 0.9535 | Test Loss: 0.2278  Acc: 0.9161
+Epoch 19/20 — Train Loss: 0.1201  Acc: 0.9534 | Val Loss: 0.2188  Acc: 0.9313 | Test Loss: 0.2175  Acc: 0.9297
+Epoch 20/20 — Train Loss: 0.0967  Acc: 0.9671 | Val Loss: 0.1535  Acc: 0.9515 | Test Loss: 0.2105  Acc: 0.9218
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold4_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold4_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/densenet201_preprocessed_fold4_metrics.csv
+Fold 5/5 — train: 3194 slices (65 patients), val: 343 slices (12 patients), test: 975 slices (19 patients)
+
+============================================================
+  FOLD 5 / 5
+============================================================
+Using device: cuda
+Built densenet201 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3194, val: 343, test: 975
+Epoch 1/20 — Train Loss: 0.2721  Acc: 0.9026 | Val Loss: 0.0666  Acc: 0.9825 | Test Loss: 0.5852  Acc: 0.7621
+Epoch 2/20 — Train Loss: 0.1602  Acc: 0.9458 | Val Loss: 0.0860  Acc: 0.9767 | Test Loss: 0.5435  Acc: 0.7610
+Epoch 3/20 — Train Loss: 0.1384  Acc: 0.9537 | Val Loss: 0.0454  Acc: 0.9825 | Test Loss: 0.6499  Acc: 0.7651
+Epoch 4/20 — Train Loss: 0.1401  Acc: 0.9580 | Val Loss: 0.0627  Acc: 0.9796 | Test Loss: 0.5917  Acc: 0.7682
+Epoch 5/20 — Train Loss: 0.1256  Acc: 0.9584 | Val Loss: 0.0272  Acc: 0.9942 | Test Loss: 0.9382  Acc: 0.7621
+Epoch 6/20 — Train Loss: 0.1128  Acc: 0.9577 | Val Loss: 0.0328  Acc: 0.9942 | Test Loss: 0.7842  Acc: 0.7641
+Epoch 7/20 — Train Loss: 0.1069  Acc: 0.9627 | Val Loss: 0.1168  Acc: 0.9679 | Test Loss: 0.5892  Acc: 0.7672
+Epoch 8/20 — Train Loss: 0.1074  Acc: 0.9631 | Val Loss: 0.0490  Acc: 0.9854 | Test Loss: 0.7028  Acc: 0.7744
+Epoch 9/20 — Train Loss: 0.1036  Acc: 0.9634 | Val Loss: 0.0425  Acc: 0.9825 | Test Loss: 0.8042  Acc: 0.7641
+Epoch 10/20 — Train Loss: 0.0909  Acc: 0.9678 | Val Loss: 0.0229  Acc: 0.9942 | Test Loss: 1.1102  Acc: 0.7528
+Epoch 11/20 — Train Loss: 0.0915  Acc: 0.9671 | Val Loss: 0.0317  Acc: 0.9942 | Test Loss: 1.0637  Acc: 0.7549
+Epoch 12/20 — Train Loss: 0.0886  Acc: 0.9678 | Val Loss: 0.0337  Acc: 0.9913 | Test Loss: 0.9851  Acc: 0.7723
+Epoch 13/20 — Train Loss: 0.0940  Acc: 0.9678 | Val Loss: 0.0762  Acc: 0.9767 | Test Loss: 0.6796  Acc: 0.7703
+Epoch 14/20 — Train Loss: 0.0880  Acc: 0.9706 | Val Loss: 0.0522  Acc: 0.9825 | Test Loss: 0.8041  Acc: 0.7672
+Epoch 15/20 — Train Loss: 0.0859  Acc: 0.9684 | Val Loss: 0.0265  Acc: 0.9913 | Test Loss: 1.1343  Acc: 0.7672
+Epoch 16/20 — Train Loss: 0.0760  Acc: 0.9737 | Val Loss: 0.0572  Acc: 0.9825 | Test Loss: 0.7797  Acc: 0.7703
+Epoch 17/20 — Train Loss: 0.0758  Acc: 0.9740 | Val Loss: 0.0504  Acc: 0.9825 | Test Loss: 0.9582  Acc: 0.7651
+Epoch 18/20 — Train Loss: 0.0695  Acc: 0.9753 | Val Loss: 0.0392  Acc: 0.9883 | Test Loss: 0.8732  Acc: 0.7723
+Epoch 19/20 — Train Loss: 0.0716  Acc: 0.9740 | Val Loss: 0.0362  Acc: 0.9883 | Test Loss: 0.9435  Acc: 0.7754
+Epoch 20/20 — Train Loss: 0.0666  Acc: 0.9771 | Val Loss: 0.0410  Acc: 0.9854 | Test Loss: 1.0473  Acc: 0.7682
+Saved best checkpoint  → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold5_best.pt
+Saved final checkpoint → /home/sxz518/PMG/results/checkpoints/crossvalidation/densenet201_preprocessed_fold5_final.pt
+Saved metrics CSV      → /home/sxz518/PMG/results/metrics/crossvalidation/densenet201_preprocessed_fold5_metrics.csv
+
+Cross-validation complete.
+  Per-fold results → results/metrics/crossvalidation/densenet201_preprocessed_crossval_per_fold.csv
+  Summary          → results/metrics/crossvalidation/densenet201_preprocessed_crossval_summary.csv
+
+  Mean test metrics across 5 folds:
+    accuracy       0.8989
+    balanced_accuracy 0.8981
+    precision      0.9224
+    recall         0.8665
+    specificity    0.9298
+    f1             0.8874
+    cohen_kappa    0.7965

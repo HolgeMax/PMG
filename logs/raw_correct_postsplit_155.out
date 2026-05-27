@@ -1,0 +1,16 @@
+Job:  raw_correct_postsplit  (155)
+Node: hendrixgpu13fl.unicph.domain
+GPUs: 0
+[2026-05-26 17:38:30,720][HYDRA] Launching 2 jobs locally
+[2026-05-26 17:38:30,721][HYDRA] 	#0 : model.name=resnet101 data_loader.train_raw=True data_loader.pmg_negative_mode=correct data_loader.balance_mode=post_split
+Cross-validation on raw data: data/PPMR
+Fold 1/5 — train: 3178 slices (65 patients), val: 1568 slices (11 patients), test: 3097 slices (20 patients)
+
+============================================================
+  FOLD 1 / 5
+============================================================
+Using device: cuda
+Built resnet101 — dropout_p=0.5, freeze_backbone=True
+Samples — train: 3178, val: 1568, test: 3097
+Epoch 1/20 — Train Loss: 0.5470  Acc: 0.7218 | Val Loss: 0.5264  Acc: 0.7404 | Test Loss: 0.4437  Acc: 0.8263
+Epoch 2/20 — Train Loss: 0.3838  Acc: 0.8414 | Val Loss: 0.5878  Acc: 0.6881 | Test Loss: 0.4621  Acc: 0.7740

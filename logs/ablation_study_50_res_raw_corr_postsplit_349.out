@@ -1,0 +1,5 @@
+Job:  ablation_study_50_res_raw_corr_postsplit  (349)
+Node: hendrixgpu25fl.unicph.domain
+GPUs: 0
+Results saved to results/ablation_study/ablation_results.csv
+Config saved to results/ablation_study/ablation_config.yaml
