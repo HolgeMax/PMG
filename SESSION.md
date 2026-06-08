@@ -1,3 +1,30 @@
+### Session 18 - 08.06.26
+
+#### Laplacian Variance Analysis — 3-Stage Pipeline Comparison
+
+**Updated `notebooks/JPEG_exploration.ipynb`** (cells `a55dfdfe` and `3b237c02`):
+- Rewrote the markdown cell to describe a 3-condition sharpness design:
+  1. Native resolution (no resizing)
+  2. Native → resize 224×224
+  3. Native → preprocess (bilateral filter, CLAHE, Canny) → resize 224×224
+- Rewrote the code cell to compute `var_native`, `var_raw`, and `var_prep` over 200 sampled images per class (PMG and HC)
+- Updated the figure to show Panel A (grouped bar chart: 3 stages × 2 classes) and Panel B (progression line plot per class)
+
+**Results confirmed via direct Python execution:**
+- PMG: native=26.2±62.3, resized=550.8±692.1 (+524.6 from resize), prep+resized=649.8±1114.5 (+99.0 from preprocessing)
+- HC:  native=513.4±549.8, resized=637.5±348.8 (+124.1 from resize), prep+resized=621.2±273.3 (−16.3 from preprocessing)
+- Key finding: PMG images gain far more Laplacian variance from downsampling than HC images — consistent with PMG slices being much larger at native resolution (lower pixel density per feature), meaning 6× downsampling compresses the same edge contrast into fewer pixels, steepening per-pixel gradients.
+
+**Updated `papers/my_paper/results_section.md`:**
+- Added proposed new text inside `<!-- PROPOSED NEW TEXT — start/end -->` markers (not yet merged):
+  - Section 5.1.2: proposed paragraph quantifying the 3-stage Laplacian variance results
+  - Section 5.2: proposed cross-reference sentence to the Laplacian analysis
+
+#### Conceptual Discussion
+- Explained why downsampling a large image (PMG native ~1300px) increases Laplacian variance: the same intensity contrast compressed into fewer pixels produces steeper per-pixel gradients, so `var(Laplacian)` rises rather than falls with aggressive downsampling.
+
+---
+
 ### Session 17 - 03.05.26
 
 #### Theory Chapter — PMG, MRI, and Deep Learning

@@ -1,6 +1,6 @@
 preprocessing:
   convert_to_grayscale: true
-  save: false
+  save: true
   save_dir: results/preprocessing_debug
   normalization:
     method: min_max
@@ -57,8 +57,8 @@ train:
   test_frac: 0.2
   seed: 42
   output_dir: results
-input_path: data/PPMR
+input_path: data/PPMR/PMGControlsEditedDec2021/34/34control1/34control1_cor_0_106.jpg
 output_path: data/PPMR_${hydra:runtime.choices.preprocessing}
 slice_idx: null
-recursive: true
+recursive: false
 edge_first: false

@@ -9,6 +9,8 @@ ablation:
   output_dir: results/ablation_study
   device: cuda                          # cuda or cpu
   box_size_frac: 0.2                    # occlusion box side as fraction of min(h, w)
+  save_example: false                   # save one example occluded image to disk
+  example_output_dir: results/ablation_study/examples
 
 hydra:
   run:

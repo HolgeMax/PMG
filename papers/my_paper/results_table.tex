@@ -1,0 +1,66 @@
+% Requires in preamble:
+%   \usepackage{booktabs}
+%   \usepackage[table]{xcolor}
+%   \usepackage{threeparttable}
+%   \usepackage{multirow}
+
+\definecolor{rowgreen}{HTML}{C8E6C9}
+\definecolor{roworange}{HTML}{FFE0B2}
+
+% ------------------------------------------------------------------
+%  TABLE: Cross-validation results across 7 experimental conditions
+% ------------------------------------------------------------------
+\begin{table}[htbp]
+\centering
+\caption{Five-fold cross-validation results (mean $\pm$ std) for ResNet101 and
+         DenseNet201 across the seven experimental conditions defined in
+         Table~\ref{tab:conditions}. Metrics: Accuracy (Acc), Precision (Prec),
+         Recall (Rec), F1-score (F1), and Cohen's $\kappa$.
+         \colorbox{roworange}{Orange} = Guha et al.\ replication (Condition~5).
+         \colorbox{rowgreen}{Green} = fully corrected protocol (Condition~3).}
+\label{tab:results}
+\begin{threeparttable}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{clll *{5}{c} @{\hspace{1.5em}} *{5}{c}}
+  \toprule
+  & & & &
+  \multicolumn{5}{c}{\textbf{ResNet101}} &
+  \multicolumn{5}{c}{\textbf{DenseNet201}} \\
+  \cmidrule(lr){5-9} \cmidrule(lr){10-14}
+  \textbf{C} & \textbf{Preprocessing} & \textbf{Labels} & \textbf{Downsampling}
+  & Acc & Prec & Rec & F1 & $\kappa$
+  & Acc & Prec & Rec & F1 & $\kappa$ \\
+  \midrule
+  1 & Raw          & Paper     & None
+    & $.850{\pm}.042$ & $.849{\pm}.054$ & $.621{\pm}.131$ & $.708{\pm}.091$ & $.613{\pm}.107$
+    & $.843{\pm}.056$ & $.874{\pm}.044$ & $.567{\pm}.209$ & $.665{\pm}.174$ & $.577{\pm}.178$ \\
+  2 & Raw          & Corrected & None
+    & $.839{\pm}.020$ & $.515{\pm}.100$ & $.206{\pm}.097$ & $.275{\pm}.100$ & $.210{\pm}.082$
+    & $.850{\pm}.033$ & $.590{\pm}.204$ & $.260{\pm}.129$ & $.343{\pm}.141$ & $.276{\pm}.129$ \\
+  \rowcolor{rowgreen}
+  3 & Raw          & Corrected & Post-split
+    & $.806{\pm}.041$ & $.424{\pm}.049$ & $.520{\pm}.170$ & $.449{\pm}.071$ & $.336{\pm}.079$
+    & $.832{\pm}.034$ & $.450{\pm}.169$ & $.408{\pm}.191$ & $.414{\pm}.172$ & $.322{\pm}.169$ \\
+  4 & Preprocessed & Paper     & None
+    & $.980{\pm}.032$ & $.991{\pm}.006$ & $.945{\pm}.103$ & $.965{\pm}.058$ & $.951{\pm}.079$
+    & $.982{\pm}.034$ & $.995{\pm}.005$ & $.947{\pm}.110$ & $.967{\pm}.061$ & $.955{\pm}.084$ \\
+  \rowcolor{roworange}
+  5 & Preprocessed & Paper     & Pre-split
+    & $.971{\pm}.055$ & $.995{\pm}.004$ & $.950{\pm}.105$ & $.969{\pm}.059$ & $.943{\pm}.108$
+    & $.970{\pm}.058$ & $.995{\pm}.005$ & $.948{\pm}.113$ & $.967{\pm}.064$ & $.940{\pm}.115$ \\
+  6 & Preprocessed & Corrected & None
+    & $.917{\pm}.034$ & $.755{\pm}.096$ & $.711{\pm}.143$ & $.728{\pm}.105$ & $.679{\pm}.124$
+    & $.919{\pm}.033$ & $.765{\pm}.080$ & $.720{\pm}.118$ & $.739{\pm}.091$ & $.691{\pm}.110$ \\
+  7 & Preprocessed & Corrected & Pre-split
+    & $.881{\pm}.078$ & $.915{\pm}.038$ & $.835{\pm}.149$ & $.868{\pm}.097$ & $.760{\pm}.155$
+    & $.899{\pm}.085$ & $.922{\pm}.020$ & $.867{\pm}.166$ & $.887{\pm}.106$ & $.797{\pm}.168$ \\
+  \bottomrule
+\end{tabular}%
+}
+\begin{tablenotes}
+  \footnotesize
+  \item[*] All values are mean $\pm$ standard deviation across 5 folds.
+           Seed fixed at 42 throughout.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

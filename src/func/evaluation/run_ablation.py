@@ -61,6 +61,8 @@ def run_ablation(cfg: DictConfig) -> None:
         test_loader,
         device=device,
         box_size_frac=cfg.ablation.box_size_frac,
+        save_example=cfg.ablation.save_example,
+        example_output_dir=Path(cfg.ablation.example_output_dir),
     )
 
     results = run_all_ckpts_ablation_study(
