@@ -3,10 +3,10 @@ from pathlib import Path
 
 import torch
 import torchvision.utils as vutils
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from src.func.evaluation.classification_metrics import compute_metrics
 from src.func.models.get_models import build_densenet201, build_resnet101
 
 _LOG = logging.getLogger(__name__)
@@ -214,34 +214,11 @@ def _evaluate_on_modified(
             predicted = (torch.sigmoid(logits) >= 0.5).long()
             all_pred.append(predicted.cpu())
             all_labels.append(labels)
-    return _calculate_metrics(
-        torch.cat(all_pred).tolist(),
+    return compute_metrics(
         torch.cat(all_labels).tolist(),
+        torch.cat(all_pred).tolist(),
     )
 
-
-def _calculate_metrics(predictions: list, labels: list) -> dict:
-    """Compute weighted classification metrics.
-
-    Args:
-        predictions: List of integer predicted labels.
-        labels: List of integer ground-truth labels.
-
-    Returns:
-        Dict with ``accuracy``, ``precision``, ``recall``, ``f1_score``.
-    """
-    return {
-        "accuracy": accuracy_score(labels, predictions),
-        "precision": precision_score(
-            labels, predictions, average="weighted", zero_division=0
-        ),
-        "recall": recall_score(
-            labels, predictions, average="weighted", zero_division=0
-        ),
-        "f1_score": f1_score(
-            labels, predictions, average="weighted", zero_division=0
-        ),
-    }
 
 
 def _save_example(images: torch.Tensor, output_dir: Path) -> None:
