@@ -1,66 +1,24 @@
 # How to Run Experiments
 
-Configuration is managed with **Hydra** — override any parameter on the command line.
+All experiments are exposed as CLI commands (`uv run <command>`) and configured with
+**Hydra** — every parameter can be overridden on the command line. Install the package
+first with `uv pip install -e .`.
 
 ---
 
-## Volume Slicing (New Dataset)
+## Commands
 
-Slices 3D NIfTI volumes into 2D JPEG slices ready for the existing training pipeline.
-Run this on the server where the data lives. Paths in the CSV are resolved as local filesystem paths.
+| Command | What it does |
+|---------|--------------|
+| `uv run preprocess` | Apply the preprocessing pipeline (grayscale → normalise → CLAHE → bilateral → Canny) to images or NIfTI volumes |
+| `uv run train` | Train a single model (ResNet-101 / DenseNet-201) |
+| `uv run crossval` | Patient-level *k*-fold stratified cross-validation |
+| `uv run evaluate` | Evaluate saved checkpoints on the held-out test set |
+| `uv run ablation` | Black-box occlusion ablation on saved checkpoints |
+| `uv run slice-volumes` | Slice 3D NIfTI volumes into 2D JPEG slices |
 
-```bash
-uv run slice-volumes                                                          # defaults
-uv run slice-volumes volume_slicing.metadata_file=data/pmg_labels.csv
-uv run slice-volumes volume_slicing.output_dir=/tmp/new_dataset
-uv run slice-volumes volume_slicing.slice_selection=central                   # middle 60%
-uv run slice-volumes volume_slicing.slice_selection=random volume_slicing.n_random_slices=80
-uv run slice-volumes volume_slicing.slice_selection=all
-```
-
-**Quick pipeline test (local BraTS volumes):**
-```bash
-uv run slice-volumes volume_slicing.metadata_file=data/nii_test_labels.csv volume_slicing.output_dir=data/nii_test_sliced
-```
-Uses `data/nii_test_labels.csv` (3 volumes: 2 PMG, 1 HC). No server access needed.
-
-**Metadata CSV format** (`data/pmg_labels.csv`):
-```
-subject,session,label,path
-sub-01,ses-001,PMG,/proc_bd5/.../sub-01_ses-001_T1w.nii.gz
-sub-0101,ses-001,HC,/proc_bd5/.../sub-0101_ses-001_T1w.nii.gz
-```
-`label` must be `PMG` (→ `PMGcases/`) or anything else, e.g. `HC` (→ `controlcases/`).
-
-| Parameter | Default | Options / type |
-|-----------|---------|----------------|
-| `volume_slicing.metadata_file` | `data/pmg_labels.csv` | path to CSV |
-| `volume_slicing.output_dir` | `data/new_dataset` | path to output directory |
-| `volume_slicing.axis` | `2` | `0`=sagittal · `1`=coronal · `2`=axial |
-| `volume_slicing.slice_selection` | `central` | `central \| all \| random` |
-| `volume_slicing.central_fraction` | `0.6` | float — fraction of slices kept from centre |
-| `volume_slicing.n_random_slices` | `80` | int — slices per volume when `random` |
-| `volume_slicing.jpeg_quality` | `95` | int |
-| `volume_slicing.seed` | `42` | int — RNG seed for `random` mode |
-
-**Output structure** (mirrors PPMR so the existing data loader works unchanged):
-```
-<output_dir>/
-├── PMGcases/<subject>/<session>/sub01-ses001_042_0_1.jpg
-└── controlcases/<subject>/<session>/sub0101-ses001_042_0_0.jpg
-```
-
-**Full workflow for new dataset:**
-```bash
-# 1. Slice volumes
-uv run slice-volumes volume_slicing.output_dir=/tmp/new_dataset
-
-# 2. Preprocess (reuses existing pipeline with any preset)
-uv run preprocess input_path=/tmp/new_dataset output_path=/tmp/new_dataset_default preprocessing=default recursive=true
-
-# 3. Train
-uv run train data_loader.data_dir=/tmp/new_dataset_default
-```
+Common patterns: append `-m` for a Hydra multirun (sweep), and chain `key=value`
+overrides separated by spaces. The detailed overrides for each command are below.
 
 ---
 
@@ -68,11 +26,11 @@ uv run train data_loader.data_dir=/tmp/new_dataset_default
 
 ```bash
 uv run preprocess input_path=data/PPMR preprocessing=default recursive=true
-uv run preprocess input_path=data/nii_test/file.nii preprocessing=light
-uv run preprocess -m input_path=data/PPMR preprocessing=default,light,minimal   # multirun
+uv run preprocess input_path=data/nii_test/file.nii preprocessing=no_clahe
+uv run preprocess -m input_path=data/PPMR preprocessing=default,no_filter,no_bilateral   # multirun
 ```
 
-**Presets:** `default` · `light` · `minimal` · `no_filter` · `no_bilateral`
+**Presets** (`hydra/preprocessing/`): `default` · `no_clahe` · `no_bilateral` · `no_filter`
 
 | Parameter | Default | Options / type |
 |-----------|---------|----------------|
@@ -94,7 +52,7 @@ uv run preprocess -m input_path=data/PPMR preprocessing=default,light,minimal   
 | `preprocessing.canny.aperture_size` | `3` | int |
 | `preprocessing.canny.blend_alpha` | `0.20` | float — 0.0 disables edge blending |
 | `preprocessing.save` | `false` | `true \| false` — save intermediate image after each step |
-| `preprocessing.save_dir` | `results/preprocessing_debug` | str — root directory for per-image step folders |
+| `preprocessing.save_dir` | `results/preprocessing_debug` | str — root for per-image step folders |
 
 **Pipeline debug images** (`preprocessing.save=true`):
 
@@ -123,7 +81,7 @@ results/preprocessing_debug/
 uv run train                                                     # defaults
 uv run train model.name=densenet201
 uv run train train.num_epochs=30 train.learning_rate=1e-3
-uv run train data_loader.data_dir=data/PPMR_light
+uv run train data_loader.data_dir=data/PPMR_default
 uv run train data_loader.balance_mode=post_split
 uv run train data_loader.train_raw=true                          # skip preprocessing
 uv run train -m model.name=resnet101,densenet201 train.learning_rate=1e-3,1e-4   # multirun
@@ -173,7 +131,9 @@ uv run train -m model.name=resnet101,densenet201 train.learning_rate=1e-3,1e-4  
 
 ## Cross-Validation
 
-Runs 5-fold (or n-fold) patient-level stratified cross-validation. Each fold trains a fresh model — one fold is test, the rest are train + val. Results are aggregated across folds (mean ± std).
+Runs 5-fold (or *n*-fold) patient-level stratified cross-validation. Each fold trains a
+fresh model — one fold is test, the rest are train + val. Results are aggregated across
+folds (mean ± std).
 
 ```bash
 uv run crossval                                                  # defaults: 5 folds, ResNet101
@@ -199,9 +159,37 @@ Accepts all `model.*`, `train.*`, and `data_loader.*` overrides from Training ab
 
 ---
 
+## Evaluation
+
+Scans a directory (recursively) for `.pt` checkpoints and evaluates each on the held-out
+test set. The architecture is inferred from each checkpoint filename (`resnet*` / `densenet*`).
+
+```bash
+uv run evaluate                                                  # defaults
+uv run evaluate evaluate.checkpoint_dir=results/checkpoints
+uv run evaluate evaluate.only_best=false                         # also evaluate *_final.pt
+uv run evaluate data_loader.data_dir=data/PPMR_default
+```
+
+Accepts all `model.*`, `train.*`, and `data_loader.*` overrides from Training above
+(used to rebuild the matching test loader and select the device).
+
+| Parameter | Default | Options / type |
+|-----------|---------|----------------|
+| `evaluate.checkpoint_dir` | `results/checkpoints` | str — scanned recursively for `*.pt` |
+| `evaluate.only_best` | `true` | `true \| false` — if false, also evaluate `*_final.pt` |
+| `evaluate.output_dir` | `results/metrics/evaluate` | str |
+
+**Outputs** in `evaluate.output_dir`:
+- `evaluation_summary.csv` — per checkpoint: accuracy, balanced_accuracy, precision, recall, specificity, F1, cohen_kappa, and the confusion-matrix counts (tp, tn, fp, fn)
+
+---
+
 ## Ablation Study
 
-Evaluates all checkpoints on the test set with a random black-box occlusion applied to each image. Tests whether the model learned meaningful brain features or trivial differences like FOV / resolution.
+Evaluates all checkpoints on the test set with a random black-box occlusion applied to
+each image. Tests whether the model learned meaningful brain features or trivial
+differences such as FOV / resolution.
 
 ```bash
 uv run ablation                                                  # defaults
@@ -223,3 +211,64 @@ Accepts all `model.*` and `data_loader.*` overrides from Training above.
 - `ablation_results.csv` — accuracy, precision, recall, F1 per checkpoint
 - `black_box_example.jpg` — example occluded image
 - `ablation_config.yaml` — config snapshot
+
+---
+
+## Volume Slicing (new dataset)
+
+Slices 3D NIfTI volumes into 2D JPEG slices ready for the existing training pipeline.
+Run this on the server where the data lives — paths in the CSV are resolved as local
+filesystem paths.
+
+```bash
+uv run slice-volumes                                                          # defaults
+uv run slice-volumes volume_slicing.metadata_file=data/pmg_labels.csv
+uv run slice-volumes volume_slicing.output_dir=/tmp/new_dataset
+uv run slice-volumes volume_slicing.slice_selection=central                   # middle 60%
+uv run slice-volumes volume_slicing.slice_selection=random volume_slicing.n_random_slices=80
+uv run slice-volumes volume_slicing.slice_selection=all
+```
+
+**Quick pipeline test (local BraTS volumes):**
+```bash
+uv run slice-volumes volume_slicing.metadata_file=data/nii_test_labels.csv volume_slicing.output_dir=data/nii_test_sliced
+```
+Uses `data/nii_test_labels.csv` (3 volumes: 2 PMG, 1 HC). No server access needed.
+
+**Metadata CSV format** (`data/pmg_labels.csv`):
+```
+subject,session,label,path
+sub-01,ses-001,PMG,/proc_bd5/.../sub-01_ses-001_T1w.nii.gz
+sub-0101,ses-001,HC,/proc_bd5/.../sub-0101_ses-001_T1w.nii.gz
+```
+`label` must be `PMG` (→ `PMGcases/`) or anything else, e.g. `HC` (→ `controlcases/`).
+
+| Parameter | Default | Options / type |
+|-----------|---------|----------------|
+| `volume_slicing.metadata_file` | `data/pmg_labels.csv` | path to CSV |
+| `volume_slicing.output_dir` | `data/new_dataset` | path to output directory |
+| `volume_slicing.axis` | `2` | `0`=sagittal · `1`=coronal · `2`=axial |
+| `volume_slicing.slice_selection` | `central` | `central \| all \| random` |
+| `volume_slicing.central_fraction` | `0.6` | float — fraction of slices kept from centre |
+| `volume_slicing.n_random_slices` | `80` | int — slices per volume when `random` |
+| `volume_slicing.jpeg_quality` | `95` | int |
+| `volume_slicing.seed` | `42` | int — RNG seed for `random` mode |
+
+**Output structure** (mirrors PPMR so the existing data loader works unchanged):
+```
+<output_dir>/
+├── PMGcases/<subject>/<session>/sub01-ses001_042_0_1.jpg
+└── controlcases/<subject>/<session>/sub0101-ses001_042_0_0.jpg
+```
+
+**Full workflow for a new dataset:**
+```bash
+# 1. Slice volumes
+uv run slice-volumes volume_slicing.output_dir=/tmp/new_dataset
+
+# 2. Preprocess (reuses existing pipeline with any preset)
+uv run preprocess input_path=/tmp/new_dataset output_path=/tmp/new_dataset_default preprocessing=default recursive=true
+
+# 3. Train
+uv run train data_loader.data_dir=/tmp/new_dataset_default
+```

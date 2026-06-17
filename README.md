@@ -1,89 +1,96 @@
-# Project Structure
-continue claude --resume c931a234-75c6-4cba-953c-fbcf5fa3b600
+# Investigating Methods for Polymicrogyria Classification
+
+This repository contains the code and written report for the special course
+*Investigating Methods for Polymicrogyria Classification* — an independent
+replication and methodological critique of Guha et al. (2025) on deep-learning
+detection of polymicrogyria (PMG) from paediatric brain MRI. The full pipeline
+— preprocessing, training, cross-validation, evaluation, and occlusion ablation —
+is exposed as Hydra-configured CLI commands; see
+[`how-to-run-experiments.md`](how-to-run-experiments.md) for usage and the complete
+list of overrides. The structure below maps the main components.
+
+## Project Structure
+
 ```
 PMG/
 ├── CLAUDE.md                          # AI agent instructions & project context
-├── GEMINI.md                          # Legacy AI agent context file
 ├── README.md                          # This file
 ├── SESSION.md                         # Session log
-├── plan.md                            # Current project plan
-├── how-to-run-experiments.md          # Guide for running experiments
-├── pyproject.toml                     # Package configuration
+├── how-to-run-experiments.md          # CLI command & override reference
+├── pyproject.toml                     # Package config + CLI entry points
+├── uv.lock                            # Locked dependencies
 │
-├── agents/                            # AI agent role definitions
-│   ├── code-critic.md
-│   ├── code-writer.md
-│   ├── documentation-writer.md
-│   ├── executor.md
-│   ├── planner.md
-│   ├── researcher.md
-│   └── synthesizer.md
-│
-├── hydra/                             # Hydra configuration files
-│   ├── config.yaml                    # Root config
-│   ├── model/
+├── hydra/                             # Hydra configuration
+│   ├── config.yaml                    # Preprocessing root config
+│   ├── crossval_config.yaml
+│   ├── evaluate_config.yaml
+│   ├── ablation_config.yaml
+│   ├── volume_slicing_config.yaml
+│   ├── model/                         # Shared model / train / data-loader configs
 │   │   ├── data_loader.yaml
 │   │   ├── model.yaml
 │   │   └── train.yaml
-│   └── preprocessing/
+│   └── preprocessing/                 # Preprocessing presets
 │       ├── default.yaml
-│       ├── light.yaml
-│       ├── minimal.yaml
+│       ├── no_clahe.yaml
+│       ├── no_bilateral.yaml
 │       └── no_filter.yaml
 │
+├── src/
+│   ├── cli/                           # CLI entry points (see pyproject.toml [project.scripts])
+│   │   ├── preprocess.py              # `uv run preprocess`
+│   │   ├── train.py                   # `uv run train`
+│   │   ├── crossval.py                # `uv run crossval`
+│   │   ├── evaluate.py                # `uv run evaluate`
+│   │   ├── ablation.py                # `uv run ablation`
+│   │   └── slice_volumes.py           # `uv run slice-volumes`
+│   ├── config/
+│   │   └── preprocessing_config.py    # Frozen dataclasses (single source of truth)
+│   ├── func/
+│   │   ├── data/
+│   │   │   ├── grayscale.py           # convert_to_grayscale()
+│   │   │   ├── bilateral.py           # apply_bilateral_filter()
+│   │   │   ├── clahe.py               # apply_clahe()
+│   │   │   ├── normalization/         # min_max, zscore, dispatcher
+│   │   │   ├── edge_detection/
+│   │   │   │   └── canny.py           # detect_edges_canny()
+│   │   │   ├── get_loader.py          # Dataset / DataLoader + patient-level split
+│   │   │   ├── crossval_split.py      # kfold_split_patients()
+│   │   │   └── volume_slicing.py      # NIfTI → 2D JPEG slicing
+│   │   ├── evaluation/
+│   │   │   ├── classification_metrics.py  # accuracy, precision, recall, F1, kappa
+│   │   │   ├── preprocessing_metrics.py   # PSNR, SSIM, entropy
+│   │   │   ├── ablation_study.py          # black-box occlusion
+│   │   │   └── run_ablation.py            # ablation orchestration
+│   │   ├── models/
+│   │   │   ├── get_models.py          # ResNet-101 / DenseNet-201 factory
+│   │   │   ├── get_train.py           # Training loop
+│   │   │   └── get_crossval.py        # Cross-validation loop
+│   │   └── utils/
+│   │       ├── cfg.py                 # Hydra → dataclass conversion
+│   │       └── loader.py              # File loading / output routing
+│   └── main/
+│       └── configurable_pipeline.py   # preprocess_image() — full preprocessing chain
+│
+├── notebooks/                         # EDA & results notebooks
+│   ├── JPEG_exploration.ipynb
+│   ├── Volume_exploration.ipynb
+│   ├── intensity_distribution.ipynb
+│   └── Metrics_exploration.ipynb      # Training / CV / ablation / NRU tables & figures
+│
+├── papers/                            # Literature + the written report
+│   ├── PPMR.bib                       # Bibliography
+│   ├── *.pdf                          # Reference papers
+│   └── my_paper/                      # Report sources (paper_draft.md, tables, figures)
+│
+├── results/                           # Generated outputs
+│   ├── checkpoints/                   # Trained model checkpoints (.pt)
+│   ├── metrics/                       # Per-epoch / cross-validation CSVs
+│   ├── ablation_study/               # Occlusion-ablation results
+│   └── plots/                         # Figures used in the report
+│
 ├── data/                              # MRI data (not tracked by git)
-│
-├── notebooks/
-│   └── JPEG_exploration.ipynb         # EDA notebook
-│
-├── papers/
-│   ├── Artikel 1.pdf
-│   ├── Artikel 2.pdf
-│   ├── Artikel 3.pdf
-│   ├── Artikel_3_code/                # Source code from paper 3
-│   │   ├── cDCM_Loss_Explained.md
-│   │   └── Deep-Contrastive-Metric-Learning-Method-to-Detect-Polymicrogyria-in-Pediatric-Brain-MRI-main/
-│   └── my_paper/                      # Working draft materials
-│       ├── project_timeline.tex
-│       └── Specialer_og_rapporter___UCPH_MATH.pdf
-│
-├── results/
-│   ├── checkpoints/
-│   │   └── best_resnet101.pt          # Best model checkpoint
-│   ├── plots/                         # Generated figures
-│   │   ├── preprocessing_comparison.png/svg
-│   │   └── ...
-│   ├── nii_test_light/                # Preprocessing sanity-check images
-│   ├── evaluation_resnet101_*.json    # Evaluation results
-│   └── YYYY-MM-DD/HH-MM-SS/          # Timestamped run logs (preprocess/train)
-│
-└── src/
-    ├── cli/
-    │   ├── preprocess.py              # CLI entry point: preprocessing pipeline
-    │   └── train.py                   # CLI entry point: training pipeline
-    ├── config/
-    │   └── preprocessing_config.py    # PAPER_CONFIG, dataclasses
-    ├── func/
-    │   ├── data/
-    │   │   ├── bilateral.py           # apply_bilateral_filter()
-    │   │   ├── clahe.py               # apply_clahe()
-    │   │   ├── grayscale.py           # convert_to_grayscale()
-    │   │   ├── get_loader.py          # Dataset/DataLoader construction
-    │   │   ├── normalization/
-    │   │   │   ├── apply_norm.py      # Normalization dispatcher
-    │   │   │   ├── min_max.py         # normalize_min_max()
-    │   │   │   └── zscore.py          # normalize_zscore()
-    │   │   └── edge_detection/
-    │   │       ├── canny.py           # detect_edges_canny()
-    │   │       └── dog.py             # detect_edges_dog()
-    │   ├── evaluation/
-    │   │   └── preprocessing_metrics.py  # PSNR, SSIM, entropy
-    │   ├── models/
-    │   │   ├── get_models.py          # Model factory
-    │   │   └── get_train.py           # Training loop
-    │   └── utils/
-    │       ├── cfg.py                 # Config utilities
-    │       └── loader.py              # Data loading helpers
-    └── main/
-        └── configurable_pipeline.py   # preprocess_image()
+├── bash/                              # SLURM job scripts (run_train.sh, run_ablation.sh)
+├── agents/                            # AI agent role definitions
+└── PMG/                               # Obsidian knowledge-graph vault (graphify)
 ```
