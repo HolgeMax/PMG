@@ -3,8 +3,7 @@
 This repository contains the code and written report for the special course
 *Investigating Methods for Polymicrogyria Classification* — an independent
 replication and methodological critique of Guha et al. (2025) on deep-learning
-detection of polymicrogyria (PMG) from paediatric brain MRI. The full pipeline
-— preprocessing, training, cross-validation, evaluation, and occlusion ablation —
+detection of polymicrogyria (PMG) from paediatric brain MRI. The full pipeline, preprocessing, training, cross-validation, evaluation, and occlusion ablation
 is exposed as Hydra-configured CLI commands; see
 [`how-to-run-experiments.md`](how-to-run-experiments.md) for usage and the complete
 list of overrides. The structure below maps the main components.
